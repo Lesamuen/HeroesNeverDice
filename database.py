@@ -12,6 +12,10 @@ class Player(UserMixin, db.Model):
      - id -- internal database unique identifier
      - username -- unique identifier used to log in
      - password -- encrypted and salted, used to log in
+     - d20
+     - ... -- the dice currency of the Player
+     - d4
+     - split_conv -- index to find splitting conversion rates
 
     Methods:
      - get_id() -- return id
@@ -20,10 +24,59 @@ class Player(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
+    
+    # Currency
+    d20 = db.Column(db.Integer, nullable = False, default=0)
+    d12 = db.Column(db.Integer, nullable = False, default=0)
+    d10 = db.Column(db.Integer, nullable = False, default=0)
+    d8 = db.Column(db.Integer, nullable = False, default=0)
+    d6 = db.Column(db.Integer, nullable = False, default=0)
+    d4 = db.Column(db.Integer, nullable = False, default=0)
+    split_conv = ((), tuple(1), (2, 1), (2, 1, 1), (3, 2, 1, 1), (5, 3, 2, 2, 1))
 
     def get_id(self):
         return str(self.id)
     
+    # Currency methods
+    ###TODO
+    def split_dice(self, typeFrom: int, typeTo: int, amount: int) -> int:
+        """
+        Splits a higher denomination of dice into an equivalent amount of lower denominations, rounded down
+
+        types: 0 -- d4, 1 -- d6, ... 5 -- d20
+
+        Arguments:
+         - typeFrom -- the higher denomination of dice
+         - typeTo -- the lower denomination of dice
+         - amount -- the amount of dice to convert
+
+        Returns:
+         - 0 -- success
+         - 1 -- not enough dice
+         - 2 -- first argument not of higher denomination
+         - 3 -- non-valid type
+        """
+
+        return 0
+
+    ###TODO
+    def fuse_dice(self, type: int, amount: int) -> int:
+        """
+        Combines two dice of lower denomination into one die of denomination above.
+
+        types: 0 -- d4, 1 -- d6, ... 5 -- d20
+
+        Arguments:
+         - type: lower denomination of dice to fuse
+         - amount: amount of higher denomination to try to create
+
+        Returns:
+         - 0 -- success
+         - 1 -- not enough dice
+         - 2 -- non-valid type
+        """
+
+        return 0
 
 def getUser(id: int) -> Player:
     """
