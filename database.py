@@ -18,7 +18,9 @@ class Player(UserMixin, db.Model):
      - split_conv -- index to find splitting conversion rates
 
     Methods:
-     - get_id() -- return id
+     - get_id -- return id
+     - split_dice -- split currency into lower currency
+     - fuse_dice -- join currency into higher currency
     """
 
     id = db.Column(db.Integer, primary_key=True)
