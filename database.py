@@ -1,6 +1,9 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
+from sqlalchemy import Integer, String, ForeignKey
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from typing import List, Optional
 
 db = SQLAlchemy()
 
@@ -23,18 +26,18 @@ class Player(UserMixin, db.Model):
      - fuse_dice -- join currency into higher currency
     """
 
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String, unique=True, nullable=False)
-    password = db.Column(db.String, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key = True)
+    username: Mapped[str] = mapped_column(unique = True)
+    password: Mapped[str]
     
     # Currency
-    d20 = db.Column(db.Integer, nullable = False, default=0)
-    d12 = db.Column(db.Integer, nullable = False, default=0)
-    d10 = db.Column(db.Integer, nullable = False, default=0)
-    d8 = db.Column(db.Integer, nullable = False, default=0)
-    d6 = db.Column(db.Integer, nullable = False, default=0)
-    d4 = db.Column(db.Integer, nullable = False, default=0)
-    split_conv = ((), tuple(1), (2, 1), (2, 1, 1), (3, 2, 1, 1), (5, 3, 2, 2, 1))
+    d4: Mapped[int] = mapped_column(default = 0)
+    d6: Mapped[int] = mapped_column(default = 0)
+    d8: Mapped[int] = mapped_column(default = 0)
+    d10: Mapped[int] = mapped_column(default = 0)
+    d12: Mapped[int] = mapped_column(default = 0)
+    d20: Mapped[int] = mapped_column(default = 0)
+    split_conv = ((), (1,), (2, 1), (2, 1, 1), (3, 2, 1, 1), (5, 3, 2, 2, 1))
 
     def get_id(self):
         return str(self.id)
