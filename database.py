@@ -84,6 +84,10 @@ def getUser(id: int) -> Player:
 
     Arguments:
      - id -- id of Player object
+
+    Returns:
+     - Player object with matching id
+     - None if no matching id
     """
 
     return db.session.execute(db.select(Player).where(Player.id == id)).scalar()
@@ -95,6 +99,10 @@ def login(username: str, password: str) -> Player:
     Arguments:
      - username -- username of Player
      - password -- password of Player
+
+    Returns:
+     - Player object with matching username/password combo
+     - None if no matching username or incorrect password
     """
 
     return db.session.execute(db.select(Player).where(Player.username == username, Player.password == password)).scalar()
@@ -102,12 +110,14 @@ def login(username: str, password: str) -> Player:
 def register(username: str, password: str) -> Player:
     """
     Tries to create a new user account.
-    If successful, returns created account.
-    If user with same username already exists, then returns None
 
     Arguments:
      - username -- username of new Player
      - password -- password of new Player
+
+    Returns:
+     - Player object of newly created account
+     - None if username is taken
     """
     
     # Create new user
