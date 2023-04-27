@@ -13,9 +13,7 @@ class Player(UserMixin, Base):
      - id: internal database unique identifier
      - username: unique identifier used to log in
      - password: encrypted and salted, used to log in
-     - d20
-     - ...: the dice currency of the Player
-     - d4
+     - dice: the dice currency of the Player
      - split_conv: index to find splitting conversion rates
      - vault: reference to list of all items in vault
      - inventory: reference to list of all items in inventory
@@ -35,12 +33,7 @@ class Player(UserMixin, Base):
     password: Mapped[str]
     
     # Currency
-    d4: Mapped[int] = mapped_column(default = 0)
-    d6: Mapped[int] = mapped_column(default = 0)
-    d8: Mapped[int] = mapped_column(default = 0)
-    d10: Mapped[int] = mapped_column(default = 0)
-    d12: Mapped[int] = mapped_column(default = 0)
-    d20: Mapped[int] = mapped_column(default = 0)
+    dice: Mapped[bytes] = mapped_column(default = bytes([0, 0, 0, 0, 0, 0]))
     split_conv = ((), (1,), (2, 1), (2, 1, 1), (3, 2, 1, 1), (5, 3, 2, 2, 1))
 
     # Items
@@ -158,9 +151,7 @@ class ItemWeapon(Item):
 
     Attributes:
      - attack: base attack value for weapon
-     - d4
-     - ...: max dice spent for attack
-     - d20
+     - dice_budget: max dice spent for attack
      - twoh: whether weapon is two-handed or one-handed
     """
 
@@ -168,12 +159,7 @@ class ItemWeapon(Item):
 
     attack: Mapped[int] = mapped_column(nullable = True)
 
-    d4: Mapped[int] = mapped_column(nullable = True, use_existing_column = True)
-    d6: Mapped[int] = mapped_column(nullable = True, use_existing_column = True)
-    d8: Mapped[int] = mapped_column(nullable = True, use_existing_column = True)
-    d10: Mapped[int] = mapped_column(nullable = True, use_existing_column = True)
-    d12: Mapped[int] = mapped_column(nullable = True, use_existing_column = True)
-    d20: Mapped[int] = mapped_column(nullable = True, use_existing_column = True)
+    dice_budget: Mapped[bytes] = mapped_column(nullable = True, use_existing_column = True)
 
     twoh: Mapped[bool] = mapped_column(nullable = True)
     
@@ -183,19 +169,12 @@ class ItemShield(Item):
     Shields are used to Defend. Always one-handed.
 
     Attributes:
-     - d4
-     - ...: max dice spent for defense
-     - d20
+     - dice_budget: max dice spent for defense
     """
 
     __mapper_args__ = {'polymorphic_identity': 1}
 
-    d4: Mapped[int] = mapped_column(nullable = True, use_existing_column = True)
-    d6: Mapped[int] = mapped_column(nullable = True, use_existing_column = True)
-    d8: Mapped[int] = mapped_column(nullable = True, use_existing_column = True)
-    d10: Mapped[int] = mapped_column(nullable = True, use_existing_column = True)
-    d12: Mapped[int] = mapped_column(nullable = True, use_existing_column = True)
-    d20: Mapped[int] = mapped_column(nullable = True, use_existing_column = True)
+    dice_budget: Mapped[bytes] = mapped_column(nullable = True, use_existing_column = True)
     
 
 class ItemArmor(Item):
