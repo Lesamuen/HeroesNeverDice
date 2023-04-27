@@ -332,6 +332,15 @@ class Battle(Base):
     Attributes:
      - dungeon_id: id of Dungeon this battle belongs to
      - dungeon: reference to related Dungeon
+     - player_hp: CURRENT hp of player
+     - player_init: current turn tick for player
+     - enemy_hp: CURRENT hp of enemy
+     - enemy_init: current turn tick for enemy
+     - enemy_speed: speed stat of enemy
+     - enemy_defense: defense stat of enemy
+     - enemy_value: starting dice pool, determines how much dice given to player upon defeat
+     - enemy_pool: how much dice enemy has left; will try to flee when out
+     - enemy_spend: how much dice the enemy tries to spend on attacking/defending every turn
     """
 
     __tablename__ = "battle"
@@ -340,14 +349,19 @@ class Battle(Base):
     dungeon: Mapped["Dungeon"] = relationship(back_populates = "battle")
 
     player_hp: Mapped[int]
-    enemy_hp: Mapped[int]
     player_init: Mapped[Optional[int]]
+    """
+    Counts down from 1 billion, for minimal error. Whenever it hits 0, resets to 1 billion and Player's turn is taken.
+    Works in same way for enemy. Increment of ticking down depends on speed stat.
+    """
+
+    enemy_hp: Mapped[int]
     enemy_init: Mapped[Optional[int]]
     enemy_speed: Mapped[int]
     enemy_defense: Mapped[int]
     enemy_value: Mapped[bytes]
     enemy_pool: Mapped[Optional[bytes]]
-    enemy_attack: Mapped[bytes]
+    enemy_spend: Mapped[bytes]
 
 
 
