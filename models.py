@@ -294,6 +294,8 @@ class Dungeon(Base):
      - player: reference to related Player
      - floor: floor level
      - floor_data: byte data for all rooms
+     - position: x and y positions in 4 bits each of player
+     - battle: if active battle, then reference to battle
     """
 
     __tablename__ = "dungeon"
@@ -304,7 +306,7 @@ class Dungeon(Base):
     floor: Mapped[int]
     floor_data: Mapped[bytes]
     """
-    Each room 1 byte. 
+    Each room 1 byte. Therefore, 100 bytes total per floor.
      - 6 bits - room type
        - 0: empty
        - 1: item
@@ -312,10 +314,40 @@ class Dungeon(Base):
        - 3: boss
        - 4: entrance
        - 5: exit
-     - 1 bit - explored or not.
+     - 1 bit - explored or not (shown on map, empty while passing through)
      - 1 bit - blocked or not (if fleed from enemy, cannot return to same room)
      - Stuff like items and monsters aren't generated until arriving at room.
     """
+
+    position: Mapped[int]
+
+    battle: Mapped[Optional["Battle"]] = relationship(back_populates = "dungeon")
+
+
+class Battle(Base):
+    """
+    Describes an active battle. Used for entered monster rooms. Includes data for active monster and stats.
+    Because room disabled upon fleeing, only need one-to-one relationship.
+
+    Attributes:
+     - dungeon_id: id of Dungeon this battle belongs to
+     - dungeon: reference to related Dungeon
+    """
+
+    __tablename__ = "battle"
+
+    dungeon_id: Mapped[int] = mapped_column(ForeignKey("dungeon.player_id"), primary_key = True)
+    dungeon: Mapped["Dungeon"] = relationship(back_populates = "battle")
+
+    player_hp: Mapped[int]
+    enemy_hp: Mapped[int]
+    player_init: Mapped[Optional[int]]
+    enemy_init: Mapped[Optional[int]]
+    enemy_speed: Mapped[int]
+    enemy_defense: Mapped[int]
+    enemy_value: Mapped[bytes]
+    enemy_pool: Mapped[Optional[bytes]]
+    enemy_attack: Mapped[bytes]
 
 
 
