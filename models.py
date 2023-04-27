@@ -1,7 +1,8 @@
 from database import Base
 from flask_login import UserMixin
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import ForeignKey, select, insert, update, delete
+from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
+from sqlalchemy.exc import IntegrityError
 from typing import List
 
 class Player(UserMixin, Base):
@@ -274,12 +275,13 @@ class ItemMarket(Base):
     price: Mapped[int]
 
 
-'''
-def getUser(id: int) -> Player:
+
+def getUser(session: Session, id: int) -> Player:
     """
     Retrieves a Player by ID
 
     Arguments:
+     - session -- request context
      - id -- id of Player object
 
     Returns:
@@ -287,14 +289,15 @@ def getUser(id: int) -> Player:
      - None if no matching id
     """
 
-    return db.session.execute(db.select(Player).where(Player.id == id)).scalar()
+    return session.execute(select(Player).where(Player.id == id)).scalar()
 
 
-def login(username: str, password: str) -> Player:
+def login(session: Session, username: str, password: str) -> Player:
     """
     Retrieves a Player by username and password, if any; if none, returns None.
 
     Arguments:
+     - session -- request context
      - username -- username of Player
      - password -- password of Player
 
@@ -303,10 +306,10 @@ def login(username: str, password: str) -> Player:
      - None if no matching username or incorrect password
     """
 
-    return db.session.execute(db.select(Player).where(Player.username == username, Player.password == password)).scalar()
+    return session.execute(select(Player).where(Player.username == username, Player.password == password)).scalar()
 
 
-def register(username: str, password: str) -> Player:
+def register(session: Session, username: str, password: str) -> Player:
     """
     Tries to create a new user account.
 
@@ -321,11 +324,10 @@ def register(username: str, password: str) -> Player:
     
     # Create new user
     try:
-        newUser = db.session.execute(db.insert(Player).values(username = username, password = password).returning(Player)).scalar()
-        db.session.commit()
-    except db.exc.IntegrityError:
+        newUser = session.execute(insert(Player).values(username = username, password = password).returning(Player)).scalar()
+        session.commit()
+    except IntegrityError:
         # If username already taken
         return None
     
     return newUser
-'''

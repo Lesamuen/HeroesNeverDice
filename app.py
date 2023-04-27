@@ -14,6 +14,7 @@ app.session = scoped_session(db.databaseSession, getcurrent)
 @app.teardown_appcontext
 def remove_session(exception):
     app.session.remove()
+    print("Request closed")
 
 # Login Manager (FlaskLogin)
 login_manager = LoginManager()
@@ -22,7 +23,7 @@ login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return models.getUser(user_id)
+    return models.getUser(app.session, user_id)
 
 def redirect_login():
     return redirect(url_for('login_page'))
@@ -49,7 +50,7 @@ def login():
     username = request.form.get('username')
     password = request.form.get('password')
 
-    player = db.login(username, password)
+    player = models.login(app.session, username, password)
 
     if player:
         login_user(player)
@@ -79,7 +80,7 @@ def register():
     username = request.form.get('username')
     password = request.form.get('password')
 
-    player = db.register(username, password)
+    player = models.register(app.session, username, password)
 
     if player:
         login_user(player)
