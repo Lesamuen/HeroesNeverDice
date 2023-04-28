@@ -3,7 +3,7 @@ from flask_login import UserMixin
 from sqlalchemy import ForeignKey, select, insert, update, delete
 from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
 from sqlalchemy.exc import IntegrityError
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 class Player(UserMixin, Base):
     """
@@ -47,14 +47,26 @@ class Player(UserMixin, Base):
         return str(self.id)
     
     # Currency methods
-    ###TODO
-    def split_dice(self, typeFrom: int, typeTo: int, amount: int) -> int:
+    def get_dice(self) -> Tuple[int]:
+        """
+        Returns currency as list of integers from d4 to d20
+        """
+        
+        currency = []
+        for i in range(6):
+            currency.append(int.from_bytes(self.dice[(i * 4) : (i * 4 + 4)]))
+
+        return tuple(currency)
+
+
+    def split_dice(self, session: Session, typeFrom: int, typeTo: int, amount: int) -> int:
         """
         Splits a higher denomination of dice into an equivalent amount of lower denominations, rounded down
 
         types: 0: d4, 1: d6, ... 5: d20
 
         Arguments:
+         - session: request context
          - typeFrom: the higher denomination of dice
          - typeTo: the lower denomination of dice
          - amount: the amount of dice to convert
@@ -66,16 +78,45 @@ class Player(UserMixin, Base):
          - 3: non-valid type
         """
 
+        # Checks for invalidation
+        if not typeFrom > typeTo:
+            return 2
+        if typeFrom < 0 or typeTo < 0 or typeFrom > 5 or typeTo > 5:
+            return 3
+        diceFrom = int.from_bytes(self.dice[(typeFrom * 4) : (typeFrom * 4 + 4)])
+        if diceFrom < amount:
+            return 1
+        
+        diceTo = int.from_bytes(self.dice[(typeTo * 4) : (typeTo * 4 + 4)])
+
+        diceFrom -= amount
+        diceTo += amount * Player.split_conv[typeFrom][typeTo]
+        bytesFrom = diceFrom.to_bytes(4)
+        bytesTo = diceTo.to_bytes(4)
+
+        newCurrency = bytearray(self.dice)
+        newCurrency[typeFrom * 4] = bytesFrom[0]
+        newCurrency[typeFrom * 4 + 1] = bytesFrom[1]
+        newCurrency[typeFrom * 4 + 2] = bytesFrom[2]
+        newCurrency[typeFrom * 4 + 3] = bytesFrom[3]
+        newCurrency[typeTo * 4] = bytesTo[0]
+        newCurrency[typeTo * 4 + 1] = bytesTo[1]
+        newCurrency[typeTo * 4 + 2] = bytesTo[2]
+        newCurrency[typeTo * 4 + 3] = bytesTo[3]
+
+        self.dice = bytes(newCurrency)
+        session.commit()
         return 0
 
-    ###TODO
-    def fuse_dice(self, typeFrom: int, amount: int) -> int:
+
+    def fuse_dice(self, session: Session, typeFrom: int, amount: int) -> int:
         """
         Combines two dice of lower denomination into one die of denomination above.
 
         types: 0: d4, 1: d6, ... 5: d20
 
         Arguments:
+         - session: request context
          - typeFrom: lower denomination of dice to fuse
          - amount: amount of higher denomination to try to create
 
@@ -85,6 +126,32 @@ class Player(UserMixin, Base):
          - 2: non-valid type
         """
 
+        # Checks for invalidation
+        if typeFrom < 0 or typeFrom > 4:
+            return 2
+        diceFrom = int.from_bytes(self.dice[(typeFrom * 4) : (typeFrom * 4 + 4)])
+        if diceFrom < amount * 2:
+            return 1
+        
+        diceTo = int.from_bytes(self.dice[(typeFrom * 4 + 4) : (typeFrom * 4 + 8)])
+
+        diceFrom -= amount * 2
+        diceTo += amount
+        bytesFrom = diceFrom.to_bytes(4)
+        bytesTo = diceTo.to_bytes(4)
+
+        newCurrency = bytearray(self.dice)
+        newCurrency[typeFrom * 4] = bytesFrom[0]
+        newCurrency[typeFrom * 4 + 1] = bytesFrom[1]
+        newCurrency[typeFrom * 4 + 2] = bytesFrom[2]
+        newCurrency[typeFrom * 4 + 3] = bytesFrom[3]
+        newCurrency[(typeFrom + 1) * 4] = bytesTo[0]
+        newCurrency[(typeFrom + 1) * 4 + 1] = bytesTo[1]
+        newCurrency[(typeFrom + 1) * 4 + 2] = bytesTo[2]
+        newCurrency[(typeFrom + 1) * 4 + 3] = bytesTo[3]
+
+        self.dice = bytes(newCurrency)
+        session.commit()
         return 0
 
 
@@ -301,6 +368,7 @@ class Dungeon(Base):
     position: Mapped[int]
 
     battle: Mapped[Optional["Battle"]] = relationship(back_populates = "dungeon")
+    """If null, then not in battle."""
 
 
 class Battle(Base):
