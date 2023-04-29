@@ -474,6 +474,9 @@ class Dungeon(Base):
          - On invalid direction: 2, <reason>
         """
 
+        if self.battle:
+            return (1, "You cannot move; currently in a battle!")
+
         row = self.position & 15 #????xxxx
         col = self.position >> 4 #xxxx????
 
@@ -553,6 +556,8 @@ class Dungeon(Base):
             self.floor_data = editableFloor
             session.commit()
             return (0, "You have found the exit!")
+        
+    
 
 
 
