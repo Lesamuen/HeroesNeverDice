@@ -1,0 +1,79 @@
+from random import randint
+from typing import Dict
+
+diceCosts = [2, 3, 4, 5, 6, 10]
+
+def randItem(floor: int) -> Dict[str, int | bytes | str]:
+    """
+    Generates a random item.
+
+    Arguments:
+     - floor: floor of dungeon this item was found
+
+    Returns:
+     - Stats for item construction
+    """
+    itemStats = {}
+    itemStats['iLvl'] = randint(floor * 10 - 5, floor * 10 + 5)
+    itemStats['itemType'] = randint(0, 2)
+
+    if itemStats['itemType'] == 0:
+        # health average = 1/3 iLvl; base attack 2x cost of attack budget
+        itemStats['attack'] = randint(0, itemStats['iLvl'] // 6) + 1
+        diceBudget = itemStats['iLvl'] // 3 - itemStats['attack'] * 2
+        dice = [1, 0, 0, 0, 0, 0]
+        while diceBudget > 0:
+            diceType = randint(0, 5)
+            diceBudget -= diceCosts[diceType]
+            dice[diceType] += 1
+        # conv to byteform
+        for i in range(6):
+            dice[i] = dice[i].to_bytes(4)
+        itemStats['dice_budget'] = dice[0] + dice[1] + dice[2] + dice[3] + dice[4] + dice[5]
+
+        # if two-handed, base attack * 2.5
+        if randint(0, 1):
+            itemStats['twoh'] = True
+            itemStats['name'] = "Lvl. " + str(itemStats['iLvl']) + " Greatsword"
+            itemStats['attack'] = int(itemStats['attack'] * 2.5)
+        else:
+            itemStats['twoh'] = False
+            itemStats['name'] = "Lvl. " + str(itemStats['iLvl']) + " Shortsword"
+        
+        return itemStats
+    
+    elif itemStats['itemType'] == 1:
+        itemStats['name'] = "Lvl. " + str(itemStats['iLvl']) + " Shield"
+
+        diceBudget = itemStats['iLvl'] // 5 - 2
+        dice = [1, 0, 0, 0, 0, 0]
+        while diceBudget > 0:
+            diceType = randint(0, 5)
+            diceBudget -= diceCosts[diceType]
+            dice[diceType] += 1
+
+        # conv to byteform
+        for i in range(6):
+            dice[i] = dice[i].to_bytes(4)
+        itemStats['dice_budget'] = dice[0] + dice[1] + dice[2] + dice[3] + dice[4] + dice[5]
+
+        return itemStats
+
+    elif itemStats['itemType'] == 2:
+        itemStats['name'] = "Lvl. " + str(itemStats['iLvl']) + " Armor"
+
+        healthWeight = randint(20, 100)
+        defenseWeight = randint(20, 100)
+        speedWeight = randint(20, 100)
+        totalWeight = healthWeight + defenseWeight + speedWeight
+        healthWeight /= totalWeight
+        defenseWeight /= totalWeight
+        speedWeight /= totalWeight
+
+        statBudget = randint(int(itemStats['iLvl'] * 0.8), int(itemStats['iLvl'] / 1.2)) + 10
+        itemStats['health'] = int(statBudget * healthWeight)
+        itemStats['defense'] = int(statBudget * defenseWeight)
+        itemStats['speed'] = int(statBudget * speedWeight)
+
+        return itemStats
+    

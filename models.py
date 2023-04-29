@@ -1,9 +1,12 @@
-from database import Base
 from flask_login import UserMixin
 from sqlalchemy import ForeignKey, select, insert, update, delete
 from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional, Tuple
+
+from database import Base
+import modelgen
+
 
 class Player(UserMixin, Base):
     """
@@ -33,7 +36,7 @@ class Player(UserMixin, Base):
     password: Mapped[str]
     
     # Currency
-    dice: Mapped[bytes] = mapped_column(default = bytes([0, 0, 0, 0, 0, 0]))
+    dice: Mapped[bytes] = mapped_column(default = bytes([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
     split_conv = ((), (1,), (2, 1), (2, 1, 1), (3, 2, 1, 1), (5, 3, 2, 2, 1))
 
     # Items
@@ -57,7 +60,6 @@ class Player(UserMixin, Base):
             currency.append(int.from_bytes(self.dice[(i * 4) : (i * 4 + 4)]))
 
         return tuple(currency)
-
 
     def split_dice(self, session: Session, typeFrom: int, typeTo: int, amount: int) -> int:
         """
@@ -107,7 +109,6 @@ class Player(UserMixin, Base):
         self.dice = bytes(newCurrency)
         session.commit()
         return 0
-
 
     def fuse_dice(self, session: Session, typeFrom: int, amount: int) -> int:
         """
@@ -176,7 +177,7 @@ class Item(Base):
     __tablename__ = 'item'
     __mapper_args__ = {'polymorphic_on': 'itemType'}
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key = True)
 
     # Type of item
     itemType: Mapped[int]
@@ -184,32 +185,40 @@ class Item(Base):
     iLvl: Mapped[int]
 
 
-    ###TODO
     @staticmethod
-    def gen(iLvl: int) -> dict[str, int]:
+    def gen(session: Session, floor: int, player: Player) -> "ItemInv":
         """
-        Generates a random item, given an item level, and passes a dictionary to be used as arguments for constructor.
+        Generates a random item, given an item floor, and player to attach to.
 
         Arguments:
-         - iLvl: the item level
+         - session: request context
+         - floor: the floor item was found on
+         - player: reference to player to attach item to
 
         Returns:
-         - Dictionary of arguments for derived Item constructor
-         - None if invalid item level
+         - Reference to created Item, attached to inventory by default
+         - None if invalid floor
         """
 
-        return dict()
-    
-    ###TODO
-    def copy() -> dict[str, int]:
-        """
-        Converts this item into dictionary of constructor arguments; used to move between inventories, for example.
+        if floor < 1:
+            return None
+        generatedItem = modelgen.randItem(floor)
+        if generatedItem['itemType'] == 0:
+            generatedItem = session.execute(insert(ItemWeapon).values(**generatedItem).returning(ItemWeapon.id)).scalar()
+        elif generatedItem['itemType'] == 1:
+            generatedItem = session.execute(insert(ItemShield).values(**generatedItem).returning(ItemShield.id)).scalar()
+        elif generatedItem['itemType'] == 2:
+            generatedItem = session.execute(insert(ItemArmor).values(**generatedItem).returning(ItemArmor.id)).scalar()
 
-        Returns:
-         - Dictionary of arguments for derived Item constructor
-        """
+        generatedItem = session.execute(insert(ItemInv).values(item_id = generatedItem, owner_id = player.id).returning(ItemInv)).scalar()
+        session.commit()
+        return generatedItem
 
-        return dict()
+    def desc(self) -> str:
+        """
+        Returns a human-readable description of the Item
+        """
+        return self.name + '\n\n'
 
 
 class ItemWeapon(Item):
@@ -225,10 +234,26 @@ class ItemWeapon(Item):
     __mapper_args__ = {'polymorphic_identity': 0}
 
     attack: Mapped[int] = mapped_column(nullable = True)
-
     dice_budget: Mapped[bytes] = mapped_column(nullable = True, use_existing_column = True)
 
     twoh: Mapped[bool] = mapped_column(nullable = True)
+
+
+    def desc(self) -> str:
+        desc = super().desc()
+        if self.twoh:
+            desc += 'TWO-HANDED\n'
+        else:
+            desc += 'ONE-HANDED\n'
+        desc += 'ATK: ' + str(self.attack) + ' + '
+        desc += str(int.from_bytes(self.dice_budget[0:4])) + 'd4 + '
+        desc += str(int.from_bytes(self.dice_budget[4:8])) + 'd6 + '
+        desc += str(int.from_bytes(self.dice_budget[8:12])) + 'd8 + '
+        desc += str(int.from_bytes(self.dice_budget[12:16])) + 'd10 + '
+        desc += str(int.from_bytes(self.dice_budget[16:20])) + 'd12 + '
+        desc += str(int.from_bytes(self.dice_budget[20:24])) + 'd20'
+
+        return desc
     
 
 class ItemShield(Item):
@@ -242,6 +267,19 @@ class ItemShield(Item):
     __mapper_args__ = {'polymorphic_identity': 1}
 
     dice_budget: Mapped[bytes] = mapped_column(nullable = True, use_existing_column = True)
+
+
+    def desc(self) -> str:
+        desc = super().desc()
+        desc += 'DEF: '
+        desc += str(int.from_bytes(self.dice_budget[0:4])) + 'd4 + '
+        desc += str(int.from_bytes(self.dice_budget[4:8])) + 'd6 + '
+        desc += str(int.from_bytes(self.dice_budget[8:12])) + 'd8 + '
+        desc += str(int.from_bytes(self.dice_budget[12:16])) + 'd10 + '
+        desc += str(int.from_bytes(self.dice_budget[16:20])) + 'd12 + '
+        desc += str(int.from_bytes(self.dice_budget[20:24])) + 'd20'
+
+        return desc
     
 
 class ItemArmor(Item):
@@ -261,6 +299,15 @@ class ItemArmor(Item):
     speed: Mapped[int] = mapped_column(nullable = True)
 
 
+    def desc(self) -> str:
+        desc = super().desc()
+        desc += 'HP: ' + str(self.health) + '\n'
+        desc += 'DEF: ' + str(self.defense) + '\n'
+        desc += 'SPD: ' + str(self.speed)
+
+        return desc
+
+
 class ItemVault(Base):
     """
     Represents an Item in a Player's vault; cannot be lost unless sold or deliberately deleted.
@@ -277,7 +324,7 @@ class ItemVault(Base):
     item_id: Mapped[int] = mapped_column(ForeignKey("item.id"), primary_key = True)
     item: Mapped["Item"] = relationship()
 
-    owner_id: Mapped[int] = mapped_column(ForeignKey("player.id"), primary_key = True)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("player.id"))
     owner: Mapped["Player"] = relationship(back_populates = "vault")
     
 
@@ -298,7 +345,7 @@ class ItemInv(Base):
     item_id: Mapped[int] = mapped_column(ForeignKey("item.id"), primary_key = True)
     item: Mapped["Item"] = relationship()
 
-    owner_id: Mapped[int] = mapped_column(ForeignKey("player.id"), primary_key = True)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("player.id"))
     owner: Mapped["Player"] = relationship(back_populates = "inventory")
     
     equipped: Mapped[bool] = mapped_column(default = False)
@@ -321,7 +368,7 @@ class ItemMarket(Base):
     item_id: Mapped[int] = mapped_column(ForeignKey("item.id"), primary_key = True)
     item: Mapped["Item"] = relationship()
 
-    owner_id: Mapped[int] = mapped_column(ForeignKey("player.id"), primary_key = True)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("player.id"))
     owner: Mapped["Player"] = relationship(back_populates = "listings")
 
     price: Mapped[int]

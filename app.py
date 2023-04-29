@@ -87,5 +87,16 @@ def register():
         return redirect(url_for('home_page'))
     return "Username is taken!", 409
 
+@app.route('/test')
+@app.route('/test/')
+@login_required
+def test():
+    return render_template('test.html')
+
+@app.route('/testgen')
+@login_required
+def testgen():
+    return models.Item.gen(app.session, 10, current_user).item.desc(), 200
+
 if __name__ == '__main__':
     app.run()
