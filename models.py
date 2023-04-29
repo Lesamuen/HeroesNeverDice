@@ -428,6 +428,10 @@ class Dungeon(Base):
         Arguments:
          - session: request context
          - player: player for which the dungeon is made
+
+        Returns:
+         - Current dungeon if already exists
+         - New dungeon at floor 1
         """
 
         if player.dungeon:
@@ -437,6 +441,20 @@ class Dungeon(Base):
         floor = session.execute(insert(Dungeon).values(player_id = player.id, floor_data = floor[0], position = floor[1]).returning(Dungeon)).scalar()
         session.commit()
         return floor
+    
+    def next(self, session: Session) -> None:
+        """
+        Goes to next floor of dungeon; generates new floor of higher level
+
+        Arguments:
+         - session: request context
+        """
+
+        floor = modelgen.randFloor()
+        self.floor_data = floor[0]
+        self.position = floor[1]
+        self.floor += 1
+        session.commit()
 
 
 class Battle(Base):
