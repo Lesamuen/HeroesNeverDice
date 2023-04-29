@@ -112,7 +112,7 @@ def randFloor() -> Tuple[bytes, int]:
                 floor += bytes(3)
                 continue
             if i == entrance[0] and j == entrance[1]:
-                floor += bytes(4 + 64)
+                floor += bytes(4 + 64) #explored bit
                 continue
             if i == exit[0] and j == exit[1]:
                 floor += bytes(5)

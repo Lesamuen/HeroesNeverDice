@@ -389,6 +389,7 @@ class Dungeon(Base):
      - floor: floor level
      - floor_data: byte data for all rooms
      - position: x and y positions in 4 bits each of player
+     - boss_defeated: whether boss is defeated and exit is unlocked
      - battle: if active battle, then reference to battle
     """
 
@@ -414,6 +415,8 @@ class Dungeon(Base):
     """
 
     position: Mapped[int]
+
+    boss_defeated: Mapped[bool] = mapped_column(default = False)
 
     battle: Mapped[Optional["Battle"]] = relationship(back_populates = "dungeon")
     """If null, then not in battle."""
@@ -456,6 +459,102 @@ class Dungeon(Base):
         self.floor += 1
         session.commit()
 
+    def move(self, session: Session, direction: int) -> Tuple[int, str]:
+        """
+        Attempts to move the player in a direction, exploring tiles
+
+        Arguments:
+         - session: request context
+         - direction: 0 up, 1 right, 2 down, 3 left
+
+        Returns:
+         - Success code, message
+         - On success: 0, <exploration message>
+         - On blocked movement: 1, <reason>
+         - On invalid direction: 2, <reason>
+        """
+
+        row = self.position & 15 #????xxxx
+        col = self.position >> 4 #xxxx????
+
+        if direction == 0:
+            if row <= 0:
+                return (1, "You cannot move there; out of bounds!")
+            row -= 1
+        elif direction == 1:
+            if col >= 9:
+                return (1, "You cannot move there; out of bounds!")
+            col += 1
+        elif direction == 2:
+            if row >= 9:
+                return (1, "You cannot move there; out of bounds!")
+            row += 1
+        elif direction == 3:
+            if col <= 0:
+                return (1, "You cannot move there; out of bounds!")
+            col -= 1
+        else:
+            return (2, "Invalid direction!")
+
+        newRoom = self.floor_data[row * 10 + col]
+        # Test blocking tile
+        if (newRoom & 128): #10000000
+            return (1, "You cannot move there; the doors to that room have sealed themselves!")
+        
+        # If already explored, nothing happens
+        if (newRoom & 64): #01000000
+            self.position = row + (col << 4)
+            session.commit()
+            return (0, "You moved successfully.")
+        
+        newRoomType = newRoom & 63 #00111111
+        if newRoomType == 0:
+            # Empty
+            self.position = row + (col << 4)
+            editableFloor = bytearray(self.floor_data)
+            editableFloor[row * 10 + col] = newRoom | 64 #01000000 set explored bit
+            self.floor_data = editableFloor
+            session.commit()
+            return (0, "You found an empty room.")
+        elif newRoomType == 1:
+            # Item
+            self.position = row + (col << 4)
+            editableFloor = bytearray(self.floor_data)
+            editableFloor[row * 10 + col] = newRoom | 64 #01000000 set explored bit
+            self.floor_data = editableFloor
+            session.commit()
+
+            foundItem = Item.gen(session, self.floor, self.player)
+
+            return (0, 'You found a ' + foundItem.item.name + '!')
+        elif newRoomType == 2:
+            # Monster
+            ###TODO
+            self.position = row + (col << 4)
+            editableFloor = bytearray(self.floor_data)
+            editableFloor[row * 10 + col] = newRoom | 64 #01000000 set explored bit
+            self.floor_data = editableFloor
+            session.commit()
+            return (0, "You have encountered a monster!")
+        elif newRoomType == 3:
+            # Boss
+            ###TODO
+            self.position = row + (col << 4)
+            editableFloor = bytearray(self.floor_data)
+            editableFloor[row * 10 + col] = newRoom | 64 #01000000 set explored bit
+            self.floor_data = editableFloor
+            session.commit()
+            return (0, "You have encountered the boss!")
+        elif newRoomType == 5:
+            # Exit
+            self.position = row + (col << 4)
+            editableFloor = bytearray(self.floor_data)
+            editableFloor[row * 10 + col] = newRoom | 64 #01000000 set explored bit
+            self.floor_data = editableFloor
+            session.commit()
+            return (0, "You have found the exit!")
+
+
 
 class Battle(Base):
     """
@@ -467,6 +566,7 @@ class Battle(Base):
      - dungeon: reference to related Dungeon
      - player_hp: CURRENT hp of player
      - player_init: current turn tick for player
+     - prev_pos: previous position of player, to move to if successful retreat
      - enemy_hp: CURRENT hp of enemy
      - enemy_init: current turn tick for enemy
      - enemy_speed: speed stat of enemy
