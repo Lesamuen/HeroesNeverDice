@@ -45,6 +45,7 @@ class Player(UserMixin, Base):
     listings: Mapped[List["ItemMarket"]] = relationship(back_populates = "owner")
 
     dungeon: Mapped[Optional["Dungeon"]] = relationship(back_populates = "player")
+    """If null, then currently in home/base"""
 
     def get_id(self):
         return str(self.id)
@@ -396,7 +397,7 @@ class Dungeon(Base):
     player_id: Mapped[int] = mapped_column(ForeignKey("player.id"), primary_key = True)
     player: Mapped["Player"] = relationship(back_populates = "dungeon")
 
-    floor: Mapped[int]
+    floor: Mapped[int] = mapped_column(default = 1)
     floor_data: Mapped[bytes]
     """
     Each room 1 byte. Therefore, 100 bytes total per floor.
@@ -416,6 +417,26 @@ class Dungeon(Base):
 
     battle: Mapped[Optional["Battle"]] = relationship(back_populates = "dungeon")
     """If null, then not in battle."""
+
+
+    @staticmethod
+    def new(session: Session, player: Player) -> "Dungeon":
+        """
+        Generate a new dungeon (move into Dungeon from base)
+        Aborts if dungeon already exists
+
+        Arguments:
+         - session: request context
+         - player: player for which the dungeon is made
+        """
+
+        if player.dungeon:
+            return player.dungeon
+
+        floor = modelgen.randFloor()
+        floor = session.execute(insert(Dungeon).values(player_id = player.id, floor_data = floor[0], position = floor[1]).returning(Dungeon)).scalar()
+        session.commit()
+        return floor
 
 
 class Battle(Base):

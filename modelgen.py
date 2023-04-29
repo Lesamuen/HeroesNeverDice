@@ -1,5 +1,5 @@
 from random import randint
-from typing import Dict
+from typing import Dict, Tuple
 
 diceCosts = [2, 3, 4, 5, 6, 10]
 
@@ -13,6 +13,7 @@ def randItem(floor: int) -> Dict[str, int | bytes | str]:
     Returns:
      - Stats for item construction
     """
+
     itemStats = {}
     itemStats['iLvl'] = randint(floor * 10 - 5, floor * 10 + 5)
     itemStats['itemType'] = randint(0, 2)
@@ -77,3 +78,54 @@ def randItem(floor: int) -> Dict[str, int | bytes | str]:
 
         return itemStats
     
+def randFloor() -> Tuple[bytes, int]:
+    """
+    Generates a 10x10 map of floors.
+
+    Returns:
+     - bytemap of floor contents
+     - initial position of player, packed into first byte
+    """
+
+    # decide side of entrance/exit; opposite sides two lines
+    side = randint(1, 4)
+    if side == 1:
+        entrance = (randint(0, 1), randint(0, 9))
+        exit = (randint(8, 9), randint(0, 9))
+    elif side == 2:
+        entrance = (randint(0, 9), randint(8, 9))
+        exit = (randint(0, 9), randint(0, 1))
+    elif side == 3:
+        entrance = (randint(8, 9), randint(0, 9))
+        exit = (randint(0, 1), randint(0, 9))
+    elif side == 4:
+        entrance = (randint(0, 9), randint(0, 1))
+        exit = (randint(0, 9), randint(8, 9))
+
+    # boss in center 4x4
+    boss = (randint(3, 6), randint(3, 6))
+
+    floor = bytes()
+    for i in range(10):
+        for j in range(10):
+            if i == boss[0] and j == boss[1]:
+                floor += bytes(3)
+                continue
+            if i == entrance[0] and j == entrance[1]:
+                floor += bytes(4 + 64)
+                continue
+            if i == exit[0] and j == exit[1]:
+                floor += bytes(5)
+                continue
+            floorResult = randint(1, 100)
+            if floorResult <= 50:
+                floor += bytes(0)
+            elif floorResult > 80:
+                floor += bytes(1)
+            else:
+                floor += bytes(2)
+
+    initpos = entrance[0] + (entrance[1] << 4)
+    
+    return (floor, initpos)
+
