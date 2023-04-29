@@ -557,8 +557,43 @@ class Dungeon(Base):
             session.commit()
             return (0, "You have found the exit!")
         
-    
+    def exit(self, session: Session) -> Tuple[int, str]:
+        """
+        Attempts to go through an entrance or exit.
 
+        Arguments:
+         - session: request context
+
+        Returns:
+         - Success code, message
+         - On success exit: 0, "You have safely returned to town!"
+         - On success next floor: 1, "You have entered floor <floor>..."
+         - Not on entrance/exit: 2, "You can't leave the floor out this way!"
+         - Boss not defeated on exit: 3, "The exit seems to be sealed by a powerful force!"
+        """
+
+        row = self.position & 15 #????xxxx
+        col = self.position >> 4 #xxxx????
+        
+        currRoom = self.floor_data[row * 10 + col]
+        currRoomType = currRoom & 63 #00111111
+        if currRoomType == 4:
+            # exit dungeon
+            session.execute(delete(Dungeon).where(Dungeon.player_id == self.player_id))
+            session.commit()
+
+            ###TODO move inventory to vault
+
+            return (0, "You have safely returned to town!")
+        elif currRoomType == 5:
+            # next floor
+            if self.boss_defeated:
+                self.next()
+                return (1, "You have entered floor " + str(self.floor) + "...")
+            else:
+                return (3, "The exit seems to be sealed by a powerful force!")
+        else:
+            return (2, "You can't leave the floor out this way!")
 
 
 class Battle(Base):
