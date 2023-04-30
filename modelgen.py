@@ -105,25 +105,25 @@ def randFloor() -> Tuple[bytes, int]:
     # boss in center 4x4
     boss = (randint(3, 6), randint(3, 6))
 
-    floor = bytes()
+    floor = bytearray()
     for i in range(10):
         for j in range(10):
             if i == boss[0] and j == boss[1]:
-                floor += bytes(3)
+                floor.append(3)
                 continue
             if i == entrance[0] and j == entrance[1]:
-                floor += bytes(4 + 64) #explored bit
+                floor.append(4 + 64) #explored bit
                 continue
             if i == exit[0] and j == exit[1]:
-                floor += bytes(5)
+                floor.append(5)
                 continue
             floorResult = randint(1, 100)
             if floorResult <= 50:
-                floor += bytes(0)
+                floor.append(0)
             elif floorResult > 80:
-                floor += bytes(1)
+                floor.append(1)
             else:
-                floor += bytes(2)
+                floor.append(2)
 
     initpos = entrance[0] + (entrance[1] << 4)
     

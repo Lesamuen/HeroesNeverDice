@@ -619,22 +619,22 @@ class Dungeon(Base):
                     continue
                 currRoom = self.floor_data[i * 10 + j]
                 currRoomType = currRoom & 63 #00111111
-                
-                # test entrance/exit
-                if currRoomType == 4:
-                    parsed[i].append(3)
-                    continue
-                elif currRoomType == 5:
-                    parsed[i].append(4)
-                    continue
 
                 # room states
                 if currRoom & 128: #10000000
                     parsed[i].append(2)
                     continue
                 elif currRoom & 64: #01000000
-                    parsed[i].append(1)
-                    continue
+                    # test entrance/exit
+                    if currRoomType == 4:
+                        parsed[i].append(3)
+                        continue
+                    elif currRoomType == 5:
+                        parsed[i].append(4)
+                        continue
+                    else:
+                        parsed[i].append(1)
+                        continue
                 else:
                     parsed[i].append(0)
                     continue
