@@ -430,6 +430,10 @@ class ItemVault(Base):
      - item: reference to the Item
      - owner_id: id of the Item's owner
      - owner: reference to Player that owns this Item
+
+    Methods:
+     - move_inv: move item from vault to inventory
+     - list: put item from vault on market with price
     """
 
     __tablename__ = "vault"
@@ -439,6 +443,31 @@ class ItemVault(Base):
 
     owner_id: Mapped[int] = mapped_column(ForeignKey("player.id"))
     owner: Mapped["Player"] = relationship(back_populates = "vault")
+
+
+    def move_inv(self, session: Session) -> None:
+        """
+        Moves this item from vault to player's inv
+        
+        Arguments:
+         - session: request context
+        """
+
+        session.execute(insert(ItemInv).values(item_id = self.item_id, owner_id = self.owner_id))
+        session.execute(delete(ItemVault).where(ItemVault.item_id == self.item_id))
+        session.commit()
+
+    def list(self, session: Session, price: int) -> None:
+        """
+        Moves this item from vault to player market, and set a price in terms of d4s
+        
+        Arguments:
+         - session: request context
+        """
+
+        session.execute(insert(ItemVault).values(item_id = self.item_id, owner_id = self.owner_id, price = price))
+        session.execute(delete(ItemMarket).where(ItemMarket.item_id == self.item_id))
+        session.commit()
     
 
 class ItemInv(Base):
@@ -451,6 +480,12 @@ class ItemInv(Base):
      - owner_id: id of the Item's owner
      - owner: reference to Player that owns this Item
      - equipped: whether owner is actively using this Item
+
+    Methods:
+     - move_vault: move item from inventory to vault
+     - drop: destroy item
+     - equip: equip item, replacing others
+     - unequip: unequip item if equipped
     """
 
     __tablename__ = "inventory"
@@ -464,6 +499,44 @@ class ItemInv(Base):
     equipped: Mapped[bool] = mapped_column(default = False)
 
 
+    def move_vault(self, session: Session) -> None:
+        """
+        Moves this item from inventory to player's vault
+        
+        Arguments:
+         - session: request context
+        """
+
+        session.execute(insert(ItemVault).values(item_id = self.item_id, owner_id = self.owner_id))
+        session.execute(delete(ItemInv).where(ItemInv.item_id == self.item_id))
+        session.commit()
+
+    def drop(self, session: Session) -> None:
+        """
+        Destroys this item from inventory, whether by manual dropping or dropping upon death
+        
+        Arguments:
+         - session: request context
+        """
+
+        itemDropped = self.item_id
+        session.execute(delete(ItemInv).where(ItemInv.item_id == itemDropped))
+        session.execute(delete(Item).where(Item.id == itemDropped))
+        session.commit()
+
+    def equip(self, session: Session) -> None:
+        """
+        
+        """
+        ### TODO
+        
+    def unequip(self, session: Session) -> None:
+        """
+        
+        """
+        ### TODO
+
+
 class ItemMarket(Base):
     """
     Represents an Item listed by a Player on the Market; stays until taken off or another Player buys it.
@@ -474,6 +547,9 @@ class ItemMarket(Base):
      - owner_id: id of the Item's owner
      - owner: reference to Player that owns this Item
      - price: amount of d4s (matching fusing exchange rates) the owner has put the Item up for sale
+
+    Methods:
+     - unlist: take item off of market back into vault
     """
     
     __tablename__ = "market"
@@ -485,6 +561,19 @@ class ItemMarket(Base):
     owner: Mapped["Player"] = relationship(back_populates = "listings")
 
     price: Mapped[int]
+    
+
+    def unlist(self, session: Session) -> None:
+        """
+        Moves this item from market to player's vault
+        
+        Arguments:
+         - session: request context
+        """
+
+        session.execute(insert(ItemVault).values(item_id = self.item_id, owner_id = self.owner_id))
+        session.execute(delete(ItemMarket).where(ItemMarket.item_id == self.item_id))
+        session.commit()
 
 
 class Dungeon(Base):
