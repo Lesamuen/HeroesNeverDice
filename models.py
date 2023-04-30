@@ -586,24 +586,28 @@ class Dungeon(Base):
             foundItem = Item.gen(session, self.floor, self.player)
 
             return (0, 'You found a ' + foundItem.item.name + '!')
-        elif newRoomType == 2:
-            # Monster
-            ###TODO
+        elif newRoomType == 2 or newRoomType == 3:
+            # Monster/Boss
+            if newRoomType == 2:
+                log = "You have encountered a monster!"
+                battle = Battle.start(session, self, False)
+            else:
+                log = "You have encountered the boss!"
+                battle = Battle.start(session, self, True)
+
+            log += "It's a " + battle.enemy_name + "!"
+
+            # First turn
+            ###TODO Implement battle mechanics
+            if not modelgen.initiative(self.player.get_speed(session), battle.enemy_speed):
+                pass
+
             self.position = row + (col << 4)
             editableFloor = bytearray(self.floor_data)
             editableFloor[row * 10 + col] = newRoom | 64 #01000000 set explored bit
             self.floor_data = editableFloor
             session.commit()
-            return (0, "You have encountered a monster!")
-        elif newRoomType == 3:
-            # Boss
-            ###TODO
-            self.position = row + (col << 4)
-            editableFloor = bytearray(self.floor_data)
-            editableFloor[row * 10 + col] = newRoom | 64 #01000000 set explored bit
-            self.floor_data = editableFloor
-            session.commit()
-            return (0, "You have encountered the boss!")
+            return (0, log)
         elif newRoomType == 5:
             # Exit
             self.position = row + (col << 4)
@@ -728,6 +732,7 @@ class Battle(Base):
     """
     prev_pos: Mapped[int]
 
+    boss: Mapped[bool]
     enemy_name: Mapped[str]
     enemy_hp: Mapped[int]
     enemy_init: Mapped[int] = mapped_column(default = 1000000000)
@@ -739,13 +744,13 @@ class Battle(Base):
 
 
     @staticmethod
-    def start(session: Session, dungeon: Dungeon, floor: int, prev_pos: int) -> "Battle":
+    def start(session: Session, dungeon: Dungeon, boss: bool) -> "Battle":
         """
         Begins a battle
         """
 
-        generatedEnemy = modelgen.randEnemy(floor)
-        generatedBattle = session.execute(insert(Battle).values(dungeon_id = dungeon.player_id, prev_pos = prev_pos, player_hp = dungeon.player.get_health(), **generatedEnemy).returning(Battle)).scalar()
+        generatedEnemy = modelgen.randEnemy(int(dungeon.floor * 1.2) + 1 if boss else dungeon.floor)
+        generatedBattle = session.execute(insert(Battle).values(boss = boss, dungeon_id = dungeon.player_id, prev_pos = dungeon.position, player_hp = dungeon.player.get_health(session), **generatedEnemy).returning(Battle)).scalar()
         
         session.commit()
         return generatedBattle

@@ -155,9 +155,9 @@ def randEnemy(floor: int) -> Dict[str, int | bytes | str]:
     speedWeight /= totalWeight
 
     statBudget = randint(int(iLvl * 0.9), int(iLvl * 1.1)) + 10
-    enemyStats['enemy_hp'] = statBudget * healthWeight
-    enemyStats['enemy_defense'] = statBudget * defenseWeight
-    enemyStats['enemy_speed'] = statBudget * speedWeight
+    enemyStats['enemy_hp'] = int(statBudget * healthWeight)
+    enemyStats['enemy_defense'] = int(statBudget * defenseWeight)
+    enemyStats['enemy_speed'] = int(statBudget * speedWeight)
     
     diceBudget = iLvl
     dice = [0, 0, 0, 0, 0, 0]
@@ -184,3 +184,17 @@ def randEnemy(floor: int) -> Dict[str, int | bytes | str]:
 
     return enemyStats
 
+def initiative(playerSpeed: int, enemySpeed: int) -> bool:
+    """
+    Rolls initiative for first turn in a battle.
+
+    Arguments:
+     - playerSpeed: speed stat of the player
+     - enemySpeed: speed stat of the enemy
+
+    Returns:
+     - True if player goes first
+     - False if enemy goes first
+    """
+
+    return (randint(1, playerSpeed) >= randint(1, enemySpeed))
