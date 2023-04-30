@@ -140,7 +140,7 @@ def randEnemy(floor: int) -> Dict[str, int | bytes | str]:
      - Stats for battle construction
     """
 
-    iLvl = randint(floor * 10 - 5, floor * 10 + 5)
+    iLvl = randint(floor * 10 - 9, floor * 10 + 5)
 
     enemyStats = {}
     enemyStats['enemy_name'] = "Lvl. " + str(iLvl) + " Goon"
