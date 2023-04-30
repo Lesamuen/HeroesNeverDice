@@ -109,8 +109,12 @@ def gen_dungeon():
 @app.route('/dungeon/move', methods = ['PUT'])
 @login_required
 def dungeon_move():
-    # incoming request: 0 = up, 1 = right, 2 = down, 3 = left
+    # incoming request: 0 = up, 1 = right, 2 = down, 3 = left, 4 = floors
     direction = request.get_json()
+    if not current_user.dungeon:
+        return "Not currently in a dungeon!"
+    if direction == 4:
+        return current_user.dungeon.exit(app.session)[1]
     return current_user.dungeon.move(app.session, direction)[1]
 
 # Testing pages

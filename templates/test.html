@@ -54,6 +54,7 @@
             http.onload = function() {
                 if (this.status == 200){
                     $("#log").append(this.responseText + "\n");
+                    getdungeon();
                 }
             };
             http.send(direction);
@@ -78,7 +79,9 @@
     <button onclick="movedungeon(1)">RIGHT</button>
     <br>
     <button onclick="movedungeon(2)">DOWN</button>
+    <br>
+    <button onclick="movedungeon(4)">EXIT</button>
     <br><br>
-    <p style="white-space: pre-wrap;" id="log"></p>
+    <p style="white-space: pre-wrap; height: 200px; overflow: scroll;" id="log"></p>
 </body>
 </html>
