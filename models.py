@@ -164,6 +164,22 @@ class Player(UserMixin, Base):
             return 10 + armor.health
         else:
             return 10
+        
+    def get_speed(self, session: Session) -> int:
+        armor = session.scalars(select(Item).join_from(Player, ItemInv).join_from(ItemInv, Item).where(ItemInv.equipped == True, Item.itemType == 2)).first()
+        # Base speed: 1 (for very low possibility of going first; player goes first on ties)
+        if armor:
+            return 1 + armor.speed
+        else:
+            return 1
+        
+    def get_defense(self, session: Session) -> int:
+        armor = session.scalars(select(Item).join_from(Player, ItemInv).join_from(ItemInv, Item).where(ItemInv.equipped == True, Item.itemType == 2)).first()
+        # Base defense: 0
+        if armor:
+            return armor.defense
+        else:
+            return 0
 
 
 class Item(Base):
