@@ -158,7 +158,12 @@ class Player(UserMixin, Base):
 
     # Stat queries
     def get_health(self, session: Session) -> int:
-        return self.inventory.filter_by(ItemInv.equipped == True, Item.itemType == 2).scalar().health
+        armor = session.scalars(select(Item).join_from(Player, ItemInv).join_from(ItemInv, Item).where(ItemInv.equipped == True, Item.itemType == 2)).first()
+        # Base hp: 10
+        if armor:
+            return 10 + armor.health
+        else:
+            return 10
 
 
 class Item(Base):
