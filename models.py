@@ -25,8 +25,14 @@ class Player(UserMixin, Base):
 
     Methods:
      - get_id: return id
+     - get_dice: return currency as ints
      - split_dice: split currency into lower currency
      - fuse_dice: join currency into higher currency
+     - get_health: health stat
+     - get_speed: speed stat
+     - get_defense: defense stat
+     - get_attack: attack stat and attack dice max
+     - get_defense: defense dice max
     """
 
     __tablename__ = "player"
@@ -158,6 +164,16 @@ class Player(UserMixin, Base):
 
     # Stat queries
     def get_health(self, session: Session) -> int:
+        """
+        Gets player's health stat
+
+        Arguments:
+         - session: request context
+
+        Returns:
+         - health stat, base 10
+        """
+
         armor = session.scalars(select(Item).join_from(Player, ItemInv).join_from(ItemInv, Item).where(ItemInv.equipped == True, Item.itemType == 2)).first()
         # Base hp: 10
         if armor:
@@ -166,6 +182,16 @@ class Player(UserMixin, Base):
             return 10
         
     def get_speed(self, session: Session) -> int:
+        """
+        Gets player's speed stat
+
+        Arguments:
+         - session: request context
+
+        Returns:
+         - speed stat, base 1
+        """
+
         armor = session.scalars(select(Item).join_from(Player, ItemInv).join_from(ItemInv, Item).where(ItemInv.equipped == True, Item.itemType == 2)).first()
         # Base speed: 1 (for very low possibility of going first; player goes first on ties)
         if armor:
@@ -174,6 +200,16 @@ class Player(UserMixin, Base):
             return 1
         
     def get_defense(self, session: Session) -> int:
+        """
+        Gets player's defense stat
+
+        Arguments:
+         - session: request context
+
+        Returns:
+         - defense stat, base 0
+        """
+
         armor = session.scalars(select(Item).join_from(Player, ItemInv).join_from(ItemInv, Item).where(ItemInv.equipped == True, Item.itemType == 2)).first()
         # Base defense: 0
         if armor:
@@ -182,6 +218,16 @@ class Player(UserMixin, Base):
             return 0
         
     def get_attack(self, session: Session) -> Tuple[int, int, int, int, int, int, int]:
+        """
+        Gets player's attack capabilities; combines both hands if two one-hands
+
+        Arguments:
+         - session: request context
+
+        Returns:
+         - base attack, 6 attack dice max; base 0 + 1d4
+        """
+
         weapons = session.scalars(select(Item).join_from(Player, ItemInv).join_from(ItemInv, Item).where(ItemInv.equipped == True, Item.itemType == 0)).all()
         if len(weapons) == 0:
             # Fists: 1d4
@@ -202,6 +248,16 @@ class Player(UserMixin, Base):
         return tuple(attack)
     
     def get_defense(self, session: Session) -> Tuple[int, int, int, int, int, int]:
+        """
+        Gets player's defense capabilities
+
+        Arguments:
+         - session: request context
+
+        Returns:
+         - 6 defense dice max; base 0
+        """
+
         shield = session.scalars(select(Item).join_from(Player, ItemInv).join_from(ItemInv, Item).where(ItemInv.equipped == True, Item.itemType == 1)).first()
 
         if not shield:
@@ -227,8 +283,8 @@ class Item(Base):
      - iLvl: the 'level' of the item that was used to generate its attributes
 
     Methods:
-     - gen: generate a random item
-     - copy: return self as args
+     - gen: generate a random item into inventory
+     - desc: return name + stats in string
     """
 
     __tablename__ = 'item'
@@ -447,6 +503,13 @@ class Dungeon(Base):
      - position: x and y positions in 4 bits each of player
      - boss_defeated: whether boss is defeated and exit is unlocked
      - battle: if active battle, then reference to battle
+
+    Methods:
+     - new: initializes dungeon object at floor 1 for player
+     - next: generates next floor
+     - move: moves player in 4 cardinal directions
+     - exit: moves player through entrance/exit
+     - parse_map: returns player view as ints
     """
 
     __tablename__ = "dungeon"
@@ -717,6 +780,9 @@ class Battle(Base):
      - enemy_value: starting dice pool, determines how much dice given to player upon defeat
      - enemy_pool: how much dice enemy has left; will try to flee when out
      - enemy_spend: how much dice the enemy tries to spend on attacking/defending every turn
+
+    Methods:
+     - start: initializes a battle object for a dungeon
     """
 
     __tablename__ = "battle"
@@ -746,7 +812,15 @@ class Battle(Base):
     @staticmethod
     def start(session: Session, dungeon: Dungeon, boss: bool) -> "Battle":
         """
-        Begins a battle
+        Generates a battle object with enemy
+
+        Arguments:
+         - session: request context
+         - dungeon: dungeon the battle is for
+         - boss: whether or not the enemy is a boss
+
+        Returns:
+         - reference to generated Battle
         """
 
         generatedEnemy = modelgen.randEnemy(int(dungeon.floor * 1.2) + 1 if boss else dungeon.floor)
