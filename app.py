@@ -29,7 +29,6 @@ def redirect_login():
     return redirect(url_for('login_page'))
 login_manager.unauthorized_handler(redirect_login)
 
-# Testing pages
 @app.route('/')
 @login_required
 def home_page():
@@ -87,13 +86,41 @@ def register():
         return redirect(url_for('home_page'))
     return "Username is taken!", 409
 
+# Dungeon routes
+@app.route('/dungeon')
+@login_required
+def get_dungeon():
+    if current_user.dungeon:
+        ###TODO could use Jinja here
+        return current_user.dungeon.parse_map()
+    else:
+        return []
+
+@app.route('/dungeon', methods = ['POST'])
+@login_required
+def gen_dungeon():
+    if current_user.dungeon:
+        ###TODO could use Jinja here
+        return current_user.dungeon.parse_map()
+    else:
+        ###TODO could use Jinja here
+        return models.Dungeon.new(app.session, current_user).parse_map()
+
+@app.route('/dungeon/move', methods = ['PUT'])
+@login_required
+def dungeon_move():
+    # incoming request: 0 = up, 1 = right, 2 = down, 3 = left
+    direction = request.get_json()
+    return current_user.dungeon.move(app.session, direction)[1]
+
+# Testing pages
 @app.route('/test')
 @app.route('/test/')
 @login_required
 def test():
     return render_template('test.html')
 
-@app.route('/testgen')
+@app.route('/testgenitem')
 @login_required
 def testgen():
     return models.Item.gen(app.session, 10, current_user).item.desc(), 200

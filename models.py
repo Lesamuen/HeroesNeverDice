@@ -2,7 +2,7 @@ from flask_login import UserMixin
 from sqlalchemy import ForeignKey, select, insert, update, delete
 from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
 from sqlalchemy.exc import IntegrityError
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 
 from database import Base
 import modelgen
@@ -598,6 +598,48 @@ class Dungeon(Base):
                 return (3, "The exit seems to be sealed by a powerful force!")
         else:
             return (2, "You can't leave the floor out this way!")
+
+    def parse_map(self) -> List[List[int]]:
+        """
+        Returns dungeon data as player can view
+
+        Returns:
+         - list of rows of rooms; 0 = unexplored (fog of war), 1 = explored, 2 = blocked, 3 = entrance, 4 = exit, 5 = player
+        """
+
+        playeri = self.position & 15 #????xxxx
+        playerj = self.position >> 4 #xxxx????
+
+        parsed = []
+        for i in range(10):
+            parsed.append([])
+            for j in range(10):
+                if i == playeri and j == playerj:
+                    parsed[i].append(5)
+                    continue
+                currRoom = self.floor_data[i * 10 + j]
+                currRoomType = currRoom & 63 #00111111
+                
+                # test entrance/exit
+                if currRoomType == 4:
+                    parsed[i].append(3)
+                    continue
+                elif currRoomType == 5:
+                    parsed[i].append(4)
+                    continue
+
+                # room states
+                if currRoom & 128: #10000000
+                    parsed[i].append(2)
+                    continue
+                elif currRoom & 64: #01000000
+                    parsed[i].append(1)
+                    continue
+                else:
+                    parsed[i].append(0)
+                    continue
+
+        return parsed
 
 
 class Battle(Base):

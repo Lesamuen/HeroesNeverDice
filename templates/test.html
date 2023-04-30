@@ -10,7 +10,7 @@
         function testgen()
         {
             var http = new XMLHttpRequest();
-            http.open("GET", "/testgen");
+            http.open("GET", "/testgenitem");
             http.setRequestHeader("Content-Type", "application/json");
             http.onload = function() {
                 if (this.status == 200){
@@ -19,11 +19,66 @@
             };
             http.send();
         }
+        
+        function getdungeon()
+        {
+            var http = new XMLHttpRequest();
+            http.open("GET", "/dungeon");
+            http.setRequestHeader("Content-Type", "application/json");
+            http.onload = function() {
+                if (this.status == 200){
+                    $("#dungeonview").text(this.responseText);
+                }
+            };
+            http.send();
+        }
+        
+        function gendungeon()
+        {
+            var http = new XMLHttpRequest();
+            http.open("POST", "/dungeon");
+            http.setRequestHeader("Content-Type", "application/json");
+            http.onload = function() {
+                if (this.status == 200){
+                    $("#dungeonview").text(this.responseText);
+                }
+            };
+            http.send();
+        }
+        
+        function movedungeon(direction)
+        {
+            var http = new XMLHttpRequest();
+            http.open("PUT", "/dungeon/move");
+            http.setRequestHeader("Content-Type", "application/json");
+            http.onload = function() {
+                if (this.status == 200){
+                    $("#log").append(this.responseText + "\n");
+                }
+            };
+            http.send(direction);
+        }
     </script>
 </head>
 
 <body>
     <a href="/logout">Logout</a>
-    <button id="testgen" onclick="testgen();" style="white-space: pre-wrap;">Testgen</button>
+    <br>
+    <button id="testgen" onclick="testgen();" style="white-space: pre-wrap;">Generate New Item in Inventory</button>
+    <br><br>
+    <p style="white-space: pre-wrap;" id="dungeonview"></p>
+    <br><br>
+    <button onclick="getdungeon()">Refresh Dungeon</button>
+    <br>
+    <button onclick="gendungeon()">Generate Dungeon</button>
+    <br>
+    <button onclick="movedungeon(0)">UP</button>
+    <br>
+    <button onclick="movedungeon(3)">LEFT</button>
+    <button onclick="movedungeon(1)">RIGHT</button>
+    <br>
+    <button onclick="movedungeon(2)">DOWN</button>
+    <br><br>
+    <p style="white-space: pre-wrap;" id="log"></p>
 </body>
 </html>
