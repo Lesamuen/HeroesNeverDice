@@ -156,6 +156,10 @@ class Player(UserMixin, Base):
         session.commit()
         return 0
 
+    # Stat queries
+    def get_health(self, session: Session) -> int:
+        return self.inventory.filter_by(ItemInv.equipped == True, Item.itemType == 2).scalar().health
+
 
 class Item(Base):
     """
@@ -607,6 +611,7 @@ class Battle(Base):
      - player_hp: CURRENT hp of player
      - player_init: current turn tick for player
      - prev_pos: previous position of player, to move to if successful retreat
+     - enemy_name: Name of enemy
      - enemy_hp: CURRENT hp of enemy
      - enemy_init: current turn tick for enemy
      - enemy_speed: speed stat of enemy
@@ -622,19 +627,34 @@ class Battle(Base):
     dungeon: Mapped["Dungeon"] = relationship(back_populates = "battle")
 
     player_hp: Mapped[int]
-    player_init: Mapped[Optional[int]]
+    player_init: Mapped[int] = mapped_column(default = 1000000000)
     """
     Counts down from 1 billion, for minimal error. Whenever it hits 0, resets to 1 billion and Player's turn is taken.
     Works in same way for enemy. Increment of ticking down depends on speed stat.
     """
+    prev_pos: Mapped[int]
 
+    enemy_name: Mapped[str]
     enemy_hp: Mapped[int]
-    enemy_init: Mapped[Optional[int]]
+    enemy_init: Mapped[int] = mapped_column(default = 1000000000)
     enemy_speed: Mapped[int]
     enemy_defense: Mapped[int]
     enemy_value: Mapped[bytes]
     enemy_pool: Mapped[Optional[bytes]]
     enemy_spend: Mapped[bytes]
+
+
+    @staticmethod
+    def start(session: Session, dungeon: Dungeon, floor: int, prev_pos: int) -> "Battle":
+        """
+        Begins a battle
+        """
+
+        generatedEnemy = modelgen.randEnemy(floor)
+        generatedBattle = session.execute(insert(Battle).values(dungeon_id = dungeon.player_id, prev_pos = prev_pos, player_hp = dungeon.player.get_health(), **generatedEnemy).returning(Battle)).scalar()
+        
+        session.commit()
+        return generatedBattle
 
 
 

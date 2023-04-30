@@ -71,7 +71,7 @@ def randItem(floor: int) -> Dict[str, int | bytes | str]:
         defenseWeight /= totalWeight
         speedWeight /= totalWeight
 
-        statBudget = randint(int(itemStats['iLvl'] * 0.8), int(itemStats['iLvl'] / 1.2)) + 10
+        statBudget = randint(int(itemStats['iLvl'] * 0.8), int(itemStats['iLvl'] * 1.2)) + 10
         itemStats['health'] = int(statBudget * healthWeight)
         itemStats['defense'] = int(statBudget * defenseWeight)
         itemStats['speed'] = int(statBudget * speedWeight)
@@ -128,4 +128,59 @@ def randFloor() -> Tuple[bytes, int]:
     initpos = entrance[0] + (entrance[1] << 4)
     
     return (floor, initpos)
+
+def randEnemy(floor: int) -> Dict[str, int | bytes | str]:
+    """
+    Generates a random enemy.
+
+    Arguments:
+     - floor: floor of dungeon the enemy is from
+
+    Returns:
+     - Stats for battle construction
+    """
+
+    iLvl = randint(floor * 10 - 5, floor * 10 + 5)
+
+    enemyStats = {}
+    enemyStats['enemy_name'] = "Lvl. " + str(iLvl) + " Goon"
+
+    # Decide base stats
+    healthWeight = randint(20, 100)
+    defenseWeight = randint(0, 50)
+    speedWeight = randint(20, 100)
+    totalWeight = healthWeight + defenseWeight + speedWeight
+    healthWeight /= totalWeight
+    defenseWeight /= totalWeight
+    speedWeight /= totalWeight
+
+    statBudget = randint(int(iLvl * 0.9), int(iLvl * 1.1)) + 10
+    enemyStats['enemy_hp'] = statBudget * healthWeight
+    enemyStats['enemy_defense'] = statBudget * defenseWeight
+    enemyStats['enemy_speed'] = statBudget * speedWeight
+    
+    diceBudget = iLvl
+    dice = [0, 0, 0, 0, 0, 0]
+    while diceBudget > 0:
+        diceType = randint(0, 5)
+        diceBudget -= diceCosts[diceType]
+        dice[diceType] += 1
+    # conv to byteform
+    for i in range(6):
+        dice[i] = dice[i].to_bytes(4)
+    enemyStats['enemy_value'] = dice[0] + dice[1] + dice[2] + dice[3] + dice[4] + dice[5]
+    enemyStats['enemy_pool'] = enemyStats['enemy_value']
+    
+    diceBudget = iLvl // 4
+    dice = [1, 1, 1, 1, 1, 1]
+    while diceBudget > 0:
+        diceType = randint(0, 5)
+        diceBudget -= diceCosts[diceType]
+        dice[diceType] += 1
+    # conv to byteform
+    for i in range(6):
+        dice[i] = dice[i].to_bytes(4)
+    enemyStats['enemy_spend'] = dice[0] + dice[1] + dice[2] + dice[3] + dice[4] + dice[5]
+
+    return enemyStats
 
