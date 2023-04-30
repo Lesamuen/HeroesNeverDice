@@ -180,6 +180,37 @@ class Player(UserMixin, Base):
             return armor.defense
         else:
             return 0
+        
+    def get_attack(self, session: Session) -> Tuple[int, int, int, int, int, int, int]:
+        weapons = session.scalars(select(Item).join_from(Player, ItemInv).join_from(ItemInv, Item).where(ItemInv.equipped == True, Item.itemType == 0)).all()
+        if len(weapons) == 0:
+            # Fists: 1d4
+            return (0, 1, 0, 0, 0, 0, 0)
+        
+        attack = []
+        weapon1 = weapons[0]
+        attack.append(weapon1.attack)
+        for i in range(6):
+            attack.append(int.from_bytes(weapon1.dice_budget[i * 4 : (i + 1) * 4]))
+
+        if len(weapons) == 2:
+            weapon2 = weapons[1]
+            attack[0] += weapon2.attack
+            for i in range(6):
+                attack[i + 1] += (int.from_bytes(weapon2.dice_budget[i * 4 : (i + 1) * 4]))
+
+        return tuple(attack)
+    
+    def get_defense(self, session: Session) -> Tuple[int, int, int, int, int, int]:
+        shield = session.scalars(select(Item).join_from(Player, ItemInv).join_from(ItemInv, Item).where(ItemInv.equipped == True, Item.itemType == 1)).first()
+
+        if not shield:
+            return (0, 0, 0, 0, 0, 0)
+        else:
+            defense = []
+            for i in range(6):
+                defense.append(int.from_bytes(shield.dice_budget[i * 4 : (i + 1) * 4]))
+            return tuple(defense)
 
 
 class Item(Base):
