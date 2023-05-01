@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from typing import List, Optional, Tuple, Dict
 
 from database import Base
-import modelgen
+import randomgen
 
 
 class Player(UserMixin, Base):
@@ -32,7 +32,7 @@ class Player(UserMixin, Base):
      - get_speed: speed stat
      - get_defense: defense stat
      - get_attack: attack stat and attack dice max
-     - get_defense: defense dice max
+     - get_active_defense: defense dice max
     """
 
     __tablename__ = "player"
@@ -174,7 +174,7 @@ class Player(UserMixin, Base):
          - health stat, base 10
         """
 
-        armor = session.scalars(select(Item).join_from(Player, ItemInv).join_from(ItemInv, Item).where(ItemInv.equipped == True, Item.itemType == 2)).first()
+        armor = session.scalars(select(Item).join_from(ItemInv, Item).where(ItemInv.owner_id == self.id, ItemInv.equipped == True, Item.itemType == 2)).first()
         # Base hp: 10
         if armor:
             return 10 + armor.health
@@ -192,7 +192,7 @@ class Player(UserMixin, Base):
          - speed stat, base 1
         """
 
-        armor = session.scalars(select(Item).join_from(Player, ItemInv).join_from(ItemInv, Item).where(ItemInv.equipped == True, Item.itemType == 2)).first()
+        armor = session.scalars(select(Item).join_from(ItemInv, Item).where(ItemInv.owner_id == self.id, ItemInv.equipped == True, Item.itemType == 2)).first()
         # Base speed: 1 (for very low possibility of going first; player goes first on ties)
         if armor:
             return 1 + armor.speed
@@ -210,7 +210,7 @@ class Player(UserMixin, Base):
          - defense stat, base 0
         """
 
-        armor = session.scalars(select(Item).join_from(Player, ItemInv).join_from(ItemInv, Item).where(ItemInv.equipped == True, Item.itemType == 2)).first()
+        armor = session.scalars(select(Item).join_from(ItemInv, Item).where(ItemInv.owner_id == self.id, ItemInv.equipped == True, Item.itemType == 2)).first()
         # Base defense: 0
         if armor:
             return armor.defense
@@ -228,7 +228,7 @@ class Player(UserMixin, Base):
          - base attack, 6 attack dice max; base 0 + 1d4
         """
 
-        weapons = session.scalars(select(Item).join_from(Player, ItemInv).join_from(ItemInv, Item).where(ItemInv.equipped == True, Item.itemType == 0)).all()
+        weapons = session.scalars(select(Item).join_from(ItemInv, Item).where(ItemInv.owner_id == self.id, ItemInv.equipped == True, Item.itemType == 0)).all()
         if len(weapons) == 0:
             # Fists: 1d4
             return (0, 1, 0, 0, 0, 0, 0)
@@ -247,7 +247,7 @@ class Player(UserMixin, Base):
 
         return tuple(attack)
     
-    def get_defense(self, session: Session) -> Tuple[int, int, int, int, int, int]:
+    def get_active_defense(self, session: Session) -> Tuple[int, int, int, int, int, int]:
         """
         Gets player's defense capabilities
 
@@ -258,7 +258,7 @@ class Player(UserMixin, Base):
          - 6 defense dice max; base 0
         """
 
-        shield = session.scalars(select(Item).join_from(Player, ItemInv).join_from(ItemInv, Item).where(ItemInv.equipped == True, Item.itemType == 1)).first()
+        shield = session.scalars(select(Item).join_from(ItemInv, Item).where(ItemInv.owner_id == self.id, ItemInv.equipped == True, Item.itemType == 1)).first()
 
         if not shield:
             return (0, 0, 0, 0, 0, 0)
@@ -315,7 +315,7 @@ class Item(Base):
 
         if floor < 1:
             return None
-        generatedItem = modelgen.randItem(floor)
+        generatedItem = randomgen.randItem(floor)
         if generatedItem['itemType'] == 0:
             generatedItem = session.execute(insert(ItemWeapon).values(**generatedItem).returning(ItemWeapon.id)).scalar()
         elif generatedItem['itemType'] == 1:
@@ -513,7 +513,8 @@ class ItemInv(Base):
 
     def drop(self, session: Session) -> None:
         """
-        Destroys this item from inventory, whether by manual dropping or dropping upon death
+        Destroys this item from inventory, whether by manual dropping or dropping upon death.
+        Does not commit.
         
         Arguments:
          - session: request context
@@ -522,7 +523,6 @@ class ItemInv(Base):
         itemDropped = self.item_id
         session.execute(delete(ItemInv).where(ItemInv.item_id == itemDropped))
         session.execute(delete(Item).where(Item.id == itemDropped))
-        session.commit()
 
     def equip(self, session: Session) -> None:
         """
@@ -648,7 +648,7 @@ class Dungeon(Base):
         if player.dungeon:
             return player.dungeon
 
-        floor = modelgen.randFloor()
+        floor = randomgen.randFloor()
         floor = session.execute(insert(Dungeon).values(player_id = player.id, floor_data = floor[0], position = floor[1]).returning(Dungeon)).scalar()
         session.commit()
         return floor
@@ -661,7 +661,7 @@ class Dungeon(Base):
          - session: request context
         """
 
-        floor = modelgen.randFloor()
+        floor = randomgen.randFloor()
         self.floor_data = floor[0]
         self.position = floor[1]
         self.floor += 1
@@ -747,18 +747,18 @@ class Dungeon(Base):
                 log = "You have encountered the boss!"
                 battle = Battle.start(session, self, True)
 
-            log += "It's a " + battle.enemy_name + "!"
-
-            # First turn
-            ###TODO Implement battle mechanics
-            if not modelgen.initiative(self.player.get_speed(session), battle.enemy_speed):
-                pass
-
+            log += "\nIt's a " + battle.enemy_name + "!"
+            
             self.position = row + (col << 4)
             editableFloor = bytearray(self.floor_data)
             editableFloor[row * 10 + col] = newRoom | 64 #01000000 set explored bit
             self.floor_data = editableFloor
             session.commit()
+
+            # Roll initiative
+            if not randomgen.initiative(self.player.get_speed(session), battle.enemy_speed):
+                log += "\n" + battle.tick_until_player()
+
             return (0, log)
         elif newRoomType == 5:
             # Exit
@@ -794,7 +794,8 @@ class Dungeon(Base):
             session.execute(delete(Dungeon).where(Dungeon.player_id == self.player_id))
             session.commit()
 
-            ###TODO move inventory to vault
+            for item in session.scalars(select(ItemInv).where(ItemInv.owner_id == self.player_id, ItemInv.equipped == True)):
+                item.move_vault()
 
             return (0, "You have safely returned to town!")
         elif currRoomType == 5:
@@ -860,18 +861,23 @@ class Battle(Base):
      - dungeon: reference to related Dungeon
      - player_hp: CURRENT hp of player
      - player_init: current turn tick for player
+     - player_temp_defense: temporary defense points from Defend action
      - prev_pos: previous position of player, to move to if successful retreat
      - enemy_name: Name of enemy
      - enemy_hp: CURRENT hp of enemy
+     - enemy_max_hp: MAX hp of enemy
      - enemy_init: current turn tick for enemy
      - enemy_speed: speed stat of enemy
      - enemy_defense: defense stat of enemy
+     - enemy_temp_defense: temporary defense points from enemy's Defend action
      - enemy_value: starting dice pool, determines how much dice given to player upon defeat
      - enemy_pool: how much dice enemy has left; will try to flee when out
      - enemy_spend: how much dice the enemy tries to spend on attacking/defending every turn
 
     Methods:
      - start: initializes a battle object for a dungeon
+     - tick_until_player: simulate battle until player turn
+     - enemy_turn: simulate enemy taking a turn
     """
 
     __tablename__ = "battle"
@@ -885,14 +891,17 @@ class Battle(Base):
     Counts down from 1 billion, for minimal error. Whenever it hits 0, resets to 1 billion and Player's turn is taken.
     Works in same way for enemy. Increment of ticking down depends on speed stat.
     """
+    player_temp_defense: Mapped[int] = mapped_column(default = 0)
     prev_pos: Mapped[int]
 
     boss: Mapped[bool]
     enemy_name: Mapped[str]
     enemy_hp: Mapped[int]
+    enemy_max_hp: Mapped[int]
     enemy_init: Mapped[int] = mapped_column(default = 1000000000)
     enemy_speed: Mapped[int]
     enemy_defense: Mapped[int]
+    enemy_temp_defense: Mapped[int] = mapped_column(default = 0)
     enemy_value: Mapped[bytes]
     enemy_pool: Mapped[Optional[bytes]]
     enemy_spend: Mapped[bytes]
@@ -912,11 +921,153 @@ class Battle(Base):
          - reference to generated Battle
         """
 
-        generatedEnemy = modelgen.randEnemy(int(dungeon.floor * 1.2) + 1 if boss else dungeon.floor)
+        generatedEnemy = randomgen.randEnemy(int(dungeon.floor * 1.2) + 1 if boss else dungeon.floor)
         generatedBattle = session.execute(insert(Battle).values(boss = boss, dungeon_id = dungeon.player_id, prev_pos = dungeon.position, player_hp = dungeon.player.get_health(session), **generatedEnemy).returning(Battle)).scalar()
         
         session.commit()
         return generatedBattle
+
+    def tick_until_player(self, session: Session) -> str:
+        """
+        Simulates enemies until next player turn.
+
+        If death occurs, then death() called.
+
+        Arguments:
+         - session: request context
+        
+        Returns:
+         - combat log
+        """
+
+        log = ""
+        playerSpeed = self.dungeon.player.get_speed(session)
+        while self.player_init > 0:
+            if self.enemy_init <= 0:
+                log += "\n" + self.enemy_name + "'s turn.\n" + self.enemy_turn(session)
+                if self.player_hp <= 0 or self.enemy_init == 2000000000: #using impossible number to mark escape
+                    break
+                self.enemy_init += 1000000000
+
+            playerTicks = self.player_init // playerSpeed + 1
+            enemyTicks = self.enemy_init // self.enemy_speed + 1
+            ticks = playerTicks if playerTicks > enemyTicks else enemyTicks
+            self.player_init -= ticks * playerSpeed
+            self.enemy_init -= ticks * self.enemy_speed
+
+            if playerTicks == enemyTicks and self.enemy_init < self.player_init:
+                # both go at same tick, but enemy go first
+                log += "\n" + self.enemy_name + "'s turn.\n" + self.enemy_turn(session)
+                if self.enemy_init == 2000000000: #using impossible number to mark escape
+                    break
+                self.enemy_init += 1000000000
+
+        if self.player_hp <= 0:
+            self.death()
+            log += "\nYou have died! Your body and soul is whisked away, leaving your items behind..."
+        elif self.enemy_init == 2000000000: #using impossible number to mark escape
+            # just delete battle, no reward
+            # boss escaping still unseals door
+            if self.boss:
+                self.dungeon.boss_defeated = True
+                log += "The boss skulks away, and you can no longer feel their oppressive presence in the air..."
+            else:
+                log += "The enemy escapes out of sight, to recuperate and return another day."
+            session.execute(delete(Battle).where(Battle.dungeon_id == self.dungeon_id))
+        else:
+            log += "\nPlayer's turn."
+        
+        session.commit()
+
+        return log
+
+    def enemy_turn(self, session: Session) -> str:
+        """
+        Simulates enemy taking their turn.
+        
+        Arguments:
+         - session: request context
+
+        Returns:
+         - combat log
+        """
+
+        log = ""
+
+        # Reset enemy temp defense
+        self.enemy_temp_defense = 0
+
+        # Retrieve enemy dice pool
+        currPool = dice_to_int(self.enemy_pool)
+
+        # if fully empty, try to run away
+        empty = True
+        for i in currPool:
+            if i > 0:
+                empty = False
+                break
+        if empty:
+            log += "Exhausted, the " + self.enemy_name + " is trying to get away...\n"
+            result = randomgen.runAway(self.enemy_speed, self.dungeon.player.get_speed(session))
+            log += result[1]
+            if result[0]:
+                log += "\n...and succeeded!"
+                self.enemy_init = 2000000000
+            else:
+                log += "\n...but failed!"
+            session.commit()
+            return log
+        
+        # if below half health, 50% chance to defend instead of attack
+        if self.enemy_hp <= self.enemy_max_hp // 2:
+            defense = randomgen.enemyDefense(currPool, dice_to_int(self.enemy_spend))
+            if defense[0]:
+                log += "Weary, the " + self.enemy_name + " tries to defend itself!\n" + defense[1]
+                self.enemy_temp_defense = defense[2]
+                self.enemy_pool = ints_to_dice(defense[3])
+                session.commit()
+                return log
+            
+        # otherwise, attack by default
+        attack = randomgen.enemyAttack(currPool, dice_to_int(self.enemy_spend))
+        log += "The " + self.enemy_name + " strikes you!\n" + attack[0]
+
+        if self.player_temp_defense >= attack[1]:
+            # player's defend action fully blocked attack
+            self.player_temp_defense -= attack[1]
+            log += "\nThe attack glances off your impeccable defense!"
+        else:
+            # mitigate with player defense
+            mitigatedDamage = attack[1] - self.player_temp_defense - self.dungeon.player.get_defense()
+            self.player_temp_defense = 0
+            if mitigatedDamage <= 0:
+                log += "\nThe attack fails to penetrate your armor!"
+            else:
+                log += "\nYou take " + str(mitigatedDamage) + " damage."
+                self.player_hp -= mitigatedDamage
+
+        self.enemy_pool = ints_to_dice(attack[2])
+        session.commit()
+        return log
+
+    def death(self, session: Session) -> None:
+        """
+        Called upon player death.
+        Battle and dungeon deleted. All items in inventory dropped.
+
+        Arguments:
+         - session: request context
+        """
+
+        # Drop all items
+        for item in session.scalars(select(ItemInv).where(ItemInv.owner_id == self.id)).all():
+            item.drop()
+
+        # Delete dungeon
+        session.execute(delete(Dungeon).where(Dungeon.player_id == self.dungeon_id))
+        session.execute(delete(Battle).where(Battle.dungeon_id == self.dungeon_id))
+
+        session.commit()
 
 
 
@@ -935,7 +1086,6 @@ def getUser(session: Session, id: int) -> Player:
 
     return session.execute(select(Player).where(Player.id == id)).scalar()
 
-
 def login(session: Session, username: str, password: str) -> Player:
     """
     Retrieves a Player by username and password, if any; if none, returns None.
@@ -951,7 +1101,6 @@ def login(session: Session, username: str, password: str) -> Player:
     """
 
     return session.execute(select(Player).where(Player.username == username, Player.password == password)).scalar()
-
 
 def register(session: Session, username: str, password: str) -> Player:
     """
@@ -975,3 +1124,34 @@ def register(session: Session, username: str, password: str) -> Player:
         return None
     
     return newUser
+
+
+def dice_to_int(dice: bytes) -> Tuple[int, int, int, int, int, int]:
+    """
+    Converts dice in byte array form into parsed integer form.
+
+    Arguments:
+     - dice: the dice in byte form to convert
+
+    Returns:
+     - tuple of all amounts of dice in integer form, from d4 to d20
+    """
+
+    dice_ints = []
+    for i in range(6):
+        dice_ints.append(int.from_bytes(dice[i * 4 : (i + 1) * 4]))
+
+    return tuple(dice_ints)
+
+def ints_to_dice(dice: Tuple[int, int, int, int, int, int]) -> bytes:
+    """
+    Converts dice in parsed integer form back to byte form for storage.
+
+    Arguments:
+     - dice: the dice in integer form to convert
+
+    Returns:
+     - byte data containing dice
+    """
+
+    return dice[0].to_bytes(4) + dice[1].to_bytes(4) + dice[2].to_bytes(4) + dice[3].to_bytes(4) + dice[4].to_bytes(4) + dice[5].to_bytes(4)

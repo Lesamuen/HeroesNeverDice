@@ -94,14 +94,13 @@ def get_dungeon():
         ###TODO could use Jinja here
         return current_user.dungeon.parse_map()
     else:
-        return []
+        return "You aren't in a dungeon!", 404
 
 @app.route('/dungeon', methods = ['POST'])
 @login_required
 def gen_dungeon():
     if current_user.dungeon:
-        ###TODO could use Jinja here
-        return current_user.dungeon.parse_map()
+        return "You're already in a dungeon!", 409
     else:
         ###TODO could use Jinja here
         return models.Dungeon.new(app.session, current_user).parse_map()
