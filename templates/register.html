@@ -1,24 +1,44 @@
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
-</head>
+    <!-- CSS -->
+    <link rel="stylesheet" href="static/style.css">
 
 <body>
-    <form action="/register" method="post">
-        <label for="username">Username: </label>
-        <input type="text" placeholder="username" name="username" value="{{request.form.username}}" required>
-    <br>
-        <label for="password">Password: </label>
-        <input type="password" placeholder="password" name="password" value="{{request.form.password}}" required>
-    <br>
-        <label>
-            <button type="submit">Register</button>
-        </label>
-    </form>
-    <a href="/login">Login</a>
+    <h1 class="title"> Heroes Never Dice </h1>
+    <section class="container">
+
+        <div id="form-content">
+            <form action="/register" method="post">
+                <header> REGISTER </header>
+                <form>
+                    <div class="field input">
+                        <label for="username">Username </label>
+                        <input type="text" placeholder="Username" name="username" value="{{ request.form.username}}"
+                            required>
+                        <br>
+                    </div>
+                    <div class="field input">
+                        <label for="password">Password </label>
+                        <input type="password" placeholder="password" name="password" value="{{ request.form.password}}"
+                            required>
+                        <br>
+                    </div>
+                </form>
+                <div class="field button">
+                    <input id="login" type="submit" value="Register" class=" button" />
+                </div>
+            </form>
+            <div class="link"> Already have an account? <a href="/login">Login</a></div>
+        </div>
+
+    </section>
 </body>
+
 </html>

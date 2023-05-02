@@ -1,24 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-</head>
+    <!-- CSS -->
+    <link rel="stylesheet" href="static/style.css">
 
 <body>
-    <form action="/login" method="post">
-        <label for="username">Username: </label>
-        <input type="text" placeholder="username" name="username" value="{{ request.form.username}}" required>
-    <br>
-        <label for="password">Password: </label>
-        <input type="password" placeholder="password" name="password" value="{{ request.form.password}}" required>
-    <br>
-        <label>
-            <button type="submit">Login</button>
-        </label>
-    </form>
-    <a href="/register">Register</a>
+    <h1 class="title"> Heroes Never Dice </h1>
+    <section class="container">
+
+        <div id="form-content">
+            <form action="/login" method="post">
+                <header> LOGIN </header>
+                <form>
+                    <div class="field input">
+                        <label for="username">Username </label>
+                        <input type="text" placeholder="Username" name="username" value="{{ request.form.username}}"
+                            required>
+                        <br>
+                    </div>
+                    <div class="field input">
+                        <label for="password">Password </label>
+                        <input type="password" placeholder="password" name="password" value="{{ request.form.password}}"
+                            required>
+                        <br>
+                    </div>
+                </form>
+                <div class="field button">
+                    <input id="login" type="submit" value="Login" class=" button" />
+                </div>
+            </form>
+            <div class="link"> Don't have an account? <a href="/register">Register</a></div>
+        </div>
+
+    </section>
 </body>
+
 </html>
