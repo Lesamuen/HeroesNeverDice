@@ -1,0 +1,55 @@
+contents of googledoc in here, this file really exists to help with folder formatting in VSCode. 
+- also works for quick reference.
+
+
+
+Essentially going to have two base files which other files will extend off of depending on what is needed
+
+These will have the name of the game centered above the navbar, then the navbar, then the body block will have everything underneath the navbar.
+ 
+HomeBase.html
+This will be the first base fill which will include the navbar and any footer necessary for the display.
+Navbar items (these are all pages that will extend the homebase.html)
+Home Page 
+Have the title screen with the press play button
+Market Page
+Where you can see all of the market listings (possibility to add sorting by price, tier, etc.) 
+Also where you can list any items that are in your vault/inventory
+Vault Page
+See the current inventory or the items that are in a players vault, also see current dice amount
+Can equip items, remove items from current inventory, add items to inventory
+ How to Play
+Outline of how the game works, yada yada yada
+Account Page
+View current account information like username, email, change passwords, 
+Log out
+
+DungeonBase.html
+This will be the second base which will be used when the user is in the game. 
+Navbar items
+{current room}
+This will be where the user can view which room they are in, passed from the backend, will say like (boss room, monster room, treasure room, etc.)
+This is not a webpage, just a jinja element we are implementing into the navbar to easily view.
+{dice count} 
+Show the player their current dice count
+Also not a webpage
+Inventory 
+Player can see their current inventory and equip items and such
+Exit dungeon 
+Player exits the dungeon and returns to the home page.
+
+
+ Web Pages to build:
+
+Out of game pages (extend homebase.html):
+Home Page
+Market Page
+Vault Page
+How to Play Page
+Account Page
+
+In game pages (extend DungeonBase.html):
+DungeonHome
+This is where the game will be held, all game actions will go here. 
+Inventory Page
+Must have a back button to go back to DungeonHome, with current state.
