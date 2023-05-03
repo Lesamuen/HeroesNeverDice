@@ -4,6 +4,39 @@ from typing import Dict, Tuple
 diceCosts = (2, 3, 4, 5, 6, 10)
 diceVals = (4, 6, 8, 10, 12, 20)
 
+def rollDice(dice: Tuple[int, int, int, int, int, int]) -> Tuple[int, str]:
+    """
+    Rolls an amount of currency.
+
+    Arguments:
+     - dice: list of all currency used
+
+    Returns:
+     - total result
+     - roll log string
+    """
+
+    log = ""
+    total = 0
+    for i in range(6):
+        if dice[i] == 0:
+            # ignore dice not rolled
+            continue
+
+        if len(log) > 0:
+            log += ' + '
+
+        result = 0
+        for j in range(dice[i]):
+            result += randint(1, diceVals[i])
+        total += result
+
+        log += str(dice[i]) + 'd' + str(diceVals[i]) + '(' + str(result) + ')'
+    
+    log += ' = ' + str(total)
+
+    return (total, log)
+
 def randItem(floor: int) -> Dict[str, int | bytes | str]:
     """
     Generates a random item.
@@ -247,22 +280,9 @@ def enemyDefense(pool: Tuple[int, int, int, int, int, int], spend: Tuple[int, in
             actualSpent.append(pool[i] if pool[i] < spend[i] else spend[i])
             pool[i] -= actualSpent[i]
 
-        log = ""
-        total = 0
-        for i in range(6):
-            if actualSpent[i] == 0:
-                continue
-            if len(log) > 0:
-                log += ' + '
-            result = 0
-            for j in range(actualSpent[i]):
-                result += randint(1, diceVals[i])
-            log += str(actualSpent[i]) + 'd' + str(diceVals[i]) + '(' + str(result) + ')'
-            total += result
-        
-        log += ' = ' + str(total)
+        result = rollDice(actualSpent)
 
-        return (True, log, total, tuple(pool))
+        return (True, result[1], result[0], tuple(pool))
     else:
         return (False,)
 
@@ -285,19 +305,8 @@ def enemyAttack(pool: Tuple[int, int, int, int, int, int], spend: Tuple[int, int
         actualSpent.append(pool[i] if pool[i] < spend[i] else spend[i])
         pool[i] -= actualSpent[i]
 
-    log = ""
-    total = 0
-    for i in range(6):
-        if actualSpent[i] == 0:
-            continue
-        if len(log) > 0:
-            log += ' + '
-        result = 0
-        for j in range(actualSpent[i]):
-            result += randint(1, diceVals[i])
-        log += str(actualSpent[i]) + 'd' + str(diceVals[i]) + '(' + str(result) + ')'
-        total += result
-    
-    log += ' = ' + str(total)
+    result = rollDice(actualSpent)
 
-    return (log, total, tuple(pool))
+    return (result[1], result[0], tuple(pool))
+
+
