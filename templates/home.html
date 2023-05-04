@@ -1,3 +1,4 @@
+<!-- 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,3 +14,23 @@
     <a href="/test">Testing Hub</a>
 </body>
 </html>
+-->
+
+<!-- Home page -->
+{% extends "homebase.html" %} {% block title %} {% endblock %} {% block header %} {% endblock %}
+
+{% block content %}
+
+<div id="home-container">
+    <form action="/logout" method="post">
+        <button type="button" class="btn btn-primary btn-sm">LOGOUT</button>
+    </form>
+    <br>
+    <form action="/game" method="get">
+        <button type="button" class="btn btn-primary btn-lg">PLAY</button>
+    </form>
+    <br>
+    
+</div>
+
+{% endblock %}

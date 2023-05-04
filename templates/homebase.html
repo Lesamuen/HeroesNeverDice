@@ -1,32 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    <link
-     rel="stylesheet" 
-     href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" 
-     integrity="sha384-r8i/2NjJ7ev5+XswfV5MzwbO4Jj/0+4D4wVXMJweKjzpxRl9a9O+byV7jLmmgHTN" 
-     crossorigin="anonymous"
-    />
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+    integrity="sha384-r8i/2NjJ7ev5+XswfV5MzwbO4Jj/0+4D4wVXMJweKjzpxRl9a9O+byV7jLmmgHTN" crossorigin="anonymous" />
 
   <title>{% block title %}{% endblock %}</title>
-  </head>
-  <body>
+</head>
 
+<body>
+  <header>
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="logo">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
-        <button
-         class="navbar-toggler" 
-         type="button" 
-         data-bs-toggle="collapse" 
-         data-bs-target="#navbarNav" 
-         aria-controls="navbarNav" 
-         aria-expanded="false" 
-         aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
@@ -50,26 +43,25 @@
         </div>
       </div>
     </nav>
+  </header>
 
-    <div class="container mt-3">
-      {% block content %}
-      {% endblock %}
-    </div>
+  <div class="container mt-3">
+    {% block content %}
+    {% endblock %}
+  </div>
 
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script
-     src="https://code.jquery.com/jquery-3.6.0.min.js" 
-     integrity="sha384-/4tKkGi9fYjz+cSl9A/CaSJ9C9uGK2/FfyG89m1gPhxrS/JSIhG/kfQ5oqm7LvTn" 
-     crossorigin="anonymous"></script>
-    <script
-     src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.10.2/umd/popper.min.js" 
-     integrity="sha512-OqV7hT0WfPxvTJrG9q3INj8zZ2sAahCwzRJw+0UnLg/TiJtevL+IdX2SLntmqyMAOgGz6UJH6PlpppLnUOy8NQ==" 
-     crossorigin="anonymous" 
-     referrerpolicy="no-referrer"></script>
-    <script
-     src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js" 
-     integrity="sha384-VZz2k/jCvRogzR+OLn0aI2QjD7VKKJNRXa94yoVx8I0aP7tLv4J4q0kV50phWcSP" 
-     crossorigin="anonymous"></script>
-  </body>
+
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha384-/4tKkGi9fYjz+cSl9A/CaSJ9C9uGK2/FfyG89m1gPhxrS/JSIhG/kfQ5oqm7LvTn"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.10.2/umd/popper.min.js"
+    integrity="sha512-OqV7hT0WfPxvTJrG9q3INj8zZ2sAahCwzRJw+0UnLg/TiJtevL+IdX2SLntmqyMAOgGz6UJH6PlpppLnUOy8NQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js"
+    integrity="sha384-VZz2k/jCvRogzR+OLn0aI2QjD7VKKJNRXa94yoVx8I0aP7tLv4J4q0kV50phWcSP"
+    crossorigin="anonymous"></script>
+</body>
+
 </html>
