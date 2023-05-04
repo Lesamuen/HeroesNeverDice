@@ -1,0 +1,34 @@
+{% extends "homebase.html" %} {% block title %} {% endblock %} {% block header %} {% endblock %}
+
+{% block content %}
+
+<div id = "howtoplay-container"
+    <h1> How To Play </h1>
+
+    <h2> How To Play </h3>
+    <p> Welcome to this dungeon crawler game! In this game, you will explore a dungeon, fight monsters, and collect loot. You will need to use your dice currency to buy and sell items, and trade with other players in the market.</p>
+    
+    <h3> The Game Currency </h3>
+    <p> The game currency is in the form of dice. There are several denominations of increasing worth: d4, d6, d8, d10, d12, and d20. You can combine lower denomination dice to make higher denomination dice, but there will be a loss of value. You can also split higher denomination dice into lower denomination dice with minimal loss of value. </p>
+    
+    <h3> Inventory </h3>
+    <p>You have an inventory of items in this game. There is a global inventory, or vault, outside the dungeon, with near infinite storage space. Items cannot be lost while they are in the global inventory. A local inventory exists while within the dungeon, where newly obtained loot goes. Upon death, everything within this inventory is lost. If you leave the dungeon safely, all loot within the inventory is transferred to the vault.</p>
+    <p> All items have an “item level”. Weapons allow the player to do various attacks, while shields allow the player to defend. Armor provides the rest of the player's base stats, like their max HP, speed, and base defense. The player only has three slots: two hands and armor. These items can be sold in markets, with an NPC market that is singleplayer and a player-based market that is multiplayer.</p>
+
+    <h3> The Dungeon </h3>
+    <p> The dungeon is made up of levels or floors. Each increasing floor increases the difficulty of the monsters found on it, and the level of the items obtained there. Each floor is a 2-dimensional grid of randomly generated rooms, and can contain one or multiple monsters, a boss, treasure, or nothing. Stairwells or ladders can be found to cross floors, but they are unlocked by killing the boss.</p>
+
+    <h3> Monsters </h3>
+    <p> Monsters are the only threat in the Dungeon, and have HP, speed, defense, attack, max attack dice, and max defense dice just like the player. When defeated, they drop dice equal to the amount they spawned with. The boss drops an amount of items, and killing the boss is necessary to unlock the exit to the next floor. When entering a room with a monster, a battle begins.</p>
+
+    <h3> Battle </h3>
+    <p> Battle is turn-queue-based, with turns taking a certain amount of “time” based on the speed stat. Players or monsters can do a single action on each turn, with attacks allowing the player to roll and spend an amount of their currency to deal damage, and defense allowing the player to roll and spend an amount of their currency to increase their defense stat temporarily. The battle ends when all monsters or the player is dead.</p>
+
+    <h3> Dice Farm </h3>
+    <p>There is a maximum number of slots for dice planting in the game.
+        Dice planting is possible to allow the player to work their way up even if they lose all their equipment and dice.
+        Dice plants take time to grow and higher tier dice take more time to grow.
+        When the dice plant reaches maximum growth, it provides two of the dice planted.</p>
+
+
+{% endblock %}
