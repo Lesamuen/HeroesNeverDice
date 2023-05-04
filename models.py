@@ -1019,26 +1019,26 @@ class Battle(Base):
             return log
         
         # if below half health, 50% chance to defend instead of attack
-        if self.enemy_hp <= self.enemy_max_hp // 2:
-            defense = randomgen.enemyDefense(currPool, dice_to_int(self.enemy_spend))
+        if self.enemy_hp <= self.enemy_max_hp // 2 and randomgen.enemyDefense():
+            defense = randomgen.spendDice(currPool, dice_to_int(self.enemy_spend))
             if defense[0]:
                 log += "Weary, the " + self.enemy_name + " tries to defend itself!\n" + defense[1]
-                self.enemy_temp_defense = defense[2]
-                self.enemy_pool = ints_to_dice(defense[3])
+                self.enemy_temp_defense = defense[0]
+                self.enemy_pool = ints_to_dice(defense[2])
                 session.commit()
                 return log
             
         # otherwise, attack by default
-        attack = randomgen.enemyAttack(currPool, dice_to_int(self.enemy_spend))
-        log += "The " + self.enemy_name + " strikes you!\n" + attack[0]
+        attack = randomgen.spendDice(currPool, dice_to_int(self.enemy_spend))
+        log += "The " + self.enemy_name + " strikes you!\n" + attack[1]
 
-        if self.player_temp_defense >= attack[1]:
+        if self.player_temp_defense >= attack[0]:
             # player's defend action fully blocked attack
-            self.player_temp_defense -= attack[1]
+            self.player_temp_defense -= attack[0]
             log += "\nThe attack glances off your impeccable defense!"
         else:
             # mitigate with player defense
-            mitigatedDamage = attack[1] - self.player_temp_defense - self.dungeon.player.get_defense()
+            mitigatedDamage = attack[0] - self.player_temp_defense - self.dungeon.player.get_defense()
             self.player_temp_defense = 0
             if mitigatedDamage <= 0:
                 log += "\nThe attack fails to penetrate your armor!"

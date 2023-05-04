@@ -37,6 +37,29 @@ def rollDice(dice: Tuple[int, int, int, int, int, int]) -> Tuple[int, str]:
 
     return (total, log)
 
+def spendDice(pool: Tuple[int, int, int, int, int, int], spend: Tuple[int, int, int, int, int, int]) -> Tuple[int, str, Tuple[int, int, int, int, int, int]]:
+    """
+    Spends as much dice as specified, up to as much dice is in the dice pool.
+
+    Arguments:
+     - pool: parsed dice available to be spent
+     - spend: parsed dice entity tries to spend
+
+    Returns:
+     - final result, roll log, new dice pool
+    """
+
+    actualSpent = []
+    pool = list(pool)
+    for i in range(6):
+        # spend up to max
+        actualSpent.append(pool[i] if pool[i] < spend[i] else spend[i])
+        pool[i] -= actualSpent[i]
+
+    result = rollDice(actualSpent)
+
+    return (result[0], result[1], tuple(pool))
+
 def randItem(floor: int) -> Dict[str, int | bytes | str]:
     """
     Generates a random item.
@@ -257,56 +280,13 @@ def runAway(escapeSpeed: int, chaseSpeed: int) -> Tuple[bool, str]:
     log = str(escapeSpeed) + "d4 (" + str(escapeCheck) + ") vs. " + str(chaseSpeed) + "d4 (" + str(chaseCheck) + ")"
     return (escapeCheck > chaseCheck, log)
 
-def enemyDefense(pool: Tuple[int, int, int, int, int, int], spend: Tuple[int, int, int, int, int, int]) -> Tuple[bool] | Tuple[bool, str, int, Tuple[int, int, int, int, int, int]]:
+def enemyDefense() -> bool:
     """
     Decides whether an enemy defends; 50% chance.
-    If so, spends dice to increase temp defense points, which resets on next enemy turn
-
-    Arguments:
-     - pool: parsed dice of enemy held
-     - spend: parsed dice enemy tries to spend
 
     Returns:
-     - False if doesn't defend
-     - True, combat log, defense roll result, and new pool if does defend
+     - True if defending, False if not
     """
 
-    # check if defending
-    if randint(0, 1):
-        actualSpent = []
-        pool = list(pool)
-        for i in range(6):
-            # spend up to max
-            actualSpent.append(pool[i] if pool[i] < spend[i] else spend[i])
-            pool[i] -= actualSpent[i]
-
-        result = rollDice(actualSpent)
-
-        return (True, result[1], result[0], tuple(pool))
-    else:
-        return (False,)
-
-def enemyAttack(pool: Tuple[int, int, int, int, int, int], spend: Tuple[int, int, int, int, int, int]) -> Tuple[str, int, Tuple[int, int, int, int, int, int]]:
-    """
-    Spends dice to do damage.
-
-    Arguments:
-     - pool: parsed dice of enemy held
-     - spend: parsed dice enemy tries to spend
-
-    Returns:
-     - combat log, attack roll result, and new pool
-    """
-
-    actualSpent = []
-    pool = list(pool)
-    for i in range(6):
-        # spend up to max
-        actualSpent.append(pool[i] if pool[i] < spend[i] else spend[i])
-        pool[i] -= actualSpent[i]
-
-    result = rollDice(actualSpent)
-
-    return (result[1], result[0], tuple(pool))
-
+    return bool(randint(0, 1))
 
