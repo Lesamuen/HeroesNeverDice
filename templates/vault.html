@@ -3,34 +3,55 @@
 {% block content %}
 
 
-<div id = "vault-container"> 
+<div id="vault-container">
     <h1> Vault </h1>
     <h2> Inventory </h2>
-    <ul id = "inventory-list"> 
-        {% for item in inventory %}
-            <li> {{ item }} </li>
-        {% endfor %}
-    </ul>
-    <h2> Dice </h2>
-    <p id = "dice-count"> {{ dice_count }} </p>
+
+    <table style = "border-collapse: collapse; ">
+        <thead>
+            <tr>
+                <th style="padding: 10px;"> Item </th>
+                <th style="padding: 10px;"> Action </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in inventory %}
+            <tr>
+                <td style ="padding: 10px;"> {{ item }} </td>
+                <td style ="padding: 10px;">
+                    <form action="/vault" method="post">
+                        <input type="hidden" name="item" value="{{ item }}">
+                        <input type="hidden" name="action" value="equip">
+                        <button type="submit"> Equip </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <h2> Equipped Items </h2>
-    <ul id = "equipped-list"> 
-        {% for item in equipped %}
-            <li> {{ item }} </li>
-        {% endfor %}
-    </ul>
-
-    <h2> Add/Remove Items </h2>
-    <form action="/vault" method="post">
-        <label for="item">Item:</label>
-        <input type="text" id="item" name="item"><br><br>
-        <label for="action">Action:</label>
-        <select id="action" name="action">
-            <option value="add">Add</option>
-            <option value="remove">Remove</option>
-        </select><br><br>
-        <input type="submit" value="Submit">
-    </form>
+    <table style = "border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th style="padding: 10px;"> Item </th>
+                <th style="padding: 10px;"> Action </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in equipped %}
+            <tr>
+                <td style = "padding: 10px;"> {{ item }} </td>
+                <td style = "padding: 10px;">
+                    <form action="/vault" method="post">
+                        <input type="hidden" name="item" value="{{ item }}">
+                        <input type="hidden" name="action" value="unequip">
+                        <button type="submit"> Unequip </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}
