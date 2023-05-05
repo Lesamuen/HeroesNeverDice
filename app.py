@@ -38,7 +38,7 @@ def home_page():
 @app.route('/login', methods=['GET'])
 def login_page():
     if current_user.is_authenticated:
-        return redirect(url_for('home_page'))
+        return redirect(url_for('home'))
     return render_template('login.html')
 
 @app.route('/login', methods=['POST'])
@@ -53,7 +53,7 @@ def login():
 
     if player:
         login_user(player)
-        return redirect(url_for('home_page'))
+        return redirect(url_for('home'))
     
     return redirect(url_for('login_page'))
     
@@ -68,13 +68,13 @@ def logout():
 @app.route('/register', methods=['GET'])
 def register_page():
     if current_user.is_authenticated:
-        return redirect(url_for('home_page'))
+        return redirect(url_for('home'))
     return render_template('register.html')
 
 @app.route('/register', methods=['POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('home_page'))
+        return redirect(url_for('home'))
     
     username = request.form.get('username')
     password = request.form.get('password')
@@ -83,7 +83,7 @@ def register():
 
     if player:
         login_user(player)
-        return redirect(url_for('home_page'))
+        return redirect(url_for('home'))
     return "Username is taken!", 409
 
 # Dungeon routes
@@ -115,6 +115,32 @@ def dungeon_move():
     if direction == 4:
         return current_user.dungeon.exit(app.session)[1]
     return current_user.dungeon.move(app.session, direction)[1]
+
+
+# Home page
+@app.route('/home')
+def home():
+    return render_template('home.html')
+
+# Market Page
+@app.route('/market')
+def market():
+    return render_template('home.html')
+
+# Vault Page
+@app.route('/vault')
+def vault():
+    return render_template('vault.html')
+
+# How to Play
+@app.route('/howtoplay')
+def howtoplay():
+    return render_template('howtoplay.html')
+
+@app.route('/account')
+def account():
+    return render_template('account.html')
+
 
 # Testing pages
 @app.route('/test')
