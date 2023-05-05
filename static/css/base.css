@@ -64,3 +64,24 @@ display: flex;
 .htp-container h2, .htp-container h3{
     color:#ffd700;
 }
+
+#market-container h1{
+    color: #ffd700
+}
+
+#market-container table th {
+    color: #b22222;
+  }
+
+#vault-container h1, #vault-container h2{
+    color: #ffd700
+} 
+
+#vault-container table th {
+    color: #b22222;
+  }
+
+#vault-container table td {
+    color: #ffd700;
+  }
+
