@@ -12,9 +12,8 @@
      href="{{ url_for('static', filename = '/css/loginreg.css') }}">
 
 <body>
-    <h1 class="title"> Heroes Never Dice </h1>
     <!-- Logo -->
-    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" class="hero-img" alt="logo" >
     <section class="container">
 
         <div id="form-content">
@@ -35,7 +34,7 @@
                     </div>
                 </form>
                 <div class="field button">
-                    <input id="login" type="submit" value="Login" class=" button" />
+                    <input id="login" type="submit" value="Login" class="gold-button" style="color: black !important;"/>
                 </div>
             </form>
             <div class="link"> Don't have an account? <a href="/register">Register</a></div>

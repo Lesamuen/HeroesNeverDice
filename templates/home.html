@@ -3,16 +3,15 @@
 
 {% block content %}
 
-<div id="home-container">
-    <form action="/logout" method="post">
-        <button type="button" class="btn btn-primary btn-sm">LOGOUT</button>
+<div class="home-container text-center">
+    <video autoplay muted onended="this.pause();" preload="auto" class="mb-4">
+        <source src="{{ url_for('static', filename='images/Heroes_Never_Dice_1.mp4') }}" type="video/mp4">
+        <img src="{{ url_for('static', filename='images/Logo.png')}}" alt="Fallback Image">
+      </video>
+    <form action="/dungeon" method="get" class="w-100">
+        <button type="button" class="btn custom-gold btn-lg btn-width mb-3">PLAY</button>
     </form>
-    <br>
-    <form action="/game" method="get">
-        <button type="button" class="btn btn-primary btn-lg">PLAY</button>
-    </form>
-    <br>
-    
 </div>
 
 {% endblock %}
+{{ url_for('static', filename='images/logo.png') }}
