@@ -20,13 +20,13 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Example listing -->
+            {% for item in market %} 
             <tr>
-                <td>Example Item</td>
-                <td>Example Seller</td>
-                <td>10 gold</td>
+                <td>{{item}}</td>
+                
                 <td><button type="button" class="btn btn-primary">Buy</button></td>
             </tr>
+            {% endfor %}
         </tbody>
     </table>
 
