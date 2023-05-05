@@ -125,7 +125,7 @@ def home():
 # Market Page
 @app.route('/market')
 def market():
-    return render_template('home.html')
+    return render_template('market.html')
 
 # Vault Page
 @app.route('/vault')
