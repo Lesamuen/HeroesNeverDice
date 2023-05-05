@@ -5,6 +5,7 @@ import database as db
 import models
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from sqlalchemy.orm import scoped_session
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Initialize Flask app
 app = Flask(__name__, template_folder = 'templates', static_folder = 'static')
@@ -120,6 +121,7 @@ def dungeon_move():
 # Home page
 @app.route('/home')
 def home():
+    
     return render_template('home.html')
 
 # Market Page
@@ -137,12 +139,34 @@ def vault():
 def howtoplay():
     return render_template('howtoplay.html')
 
-@app.route('/account')
+# Account Page
+@app.route('/account', methods=['GET', 'POST'])
 def account():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        confirmPassword = request.form['confirm-password']
+
+        if username:
+            current_user.username = username
+        if email:
+            current_user.email = email
+        if password and (password == confirmPassword):
+            current_user.password = generate_password_hash(password)
+        
+        db.session.commit()
+        return redirect(url_for(account))
     return render_template('account.html')
 
+#Dungeon display (temp)
+@app.route('/display_dungeon')
+def display_dungeon():
+    images = ['d4.png', 'd6.png', 'd8.png', 'd10.png', 'd12.png', 'd20.png']
+    dice_values =[0, 2, 4, 6, 8, 1]
+    return render_template('dungeon.html', die_images = images, dice_values = dice_values,  builtins=__builtins__)
 
-# Testing pages
+# Testing pagessssss
 @app.route('/test')
 @app.route('/test/')
 @login_required
