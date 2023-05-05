@@ -1,17 +1,16 @@
 <!-- Home page -->
-{% extends "homebase.html" %} {% block title %} {% endblock %} {% block header %} {% endblock %}
+{% extends "homebase.html" %} {% block title %}Home{% endblock %} {% block header %} {% endblock %}
 
 {% block content %}
 
 <div class="home-container text-center">
-    <video autoplay muted onended="this.pause();" preload="auto" class="mb-4">
+    <video autoplay muted onended="this.pause();" preload="auto" class="mb-4 mt-4">
         <source src="{{ url_for('static', filename='images/Heroes_Never_Dice_1.mp4') }}" type="video/mp4">
         <img src="{{ url_for('static', filename='images/Logo.png')}}" alt="Fallback Image">
       </video>
-    <form action="/dungeon" method="get" class="w-100">
-        <button type="button" class="btn custom-gold btn-lg btn-width mb-3">PLAY</button>
+    <form action="{{url_for('display_dungeon')}}" method="get" class="w-100">
+        <button type="submit" class="btn custom-gold btn-lg btn-width mb-3 mt-4">PLAY</button>
     </form>
 </div>
 
 {% endblock %}
-{{ url_for('static', filename='images/logo.png') }}
