@@ -106,6 +106,35 @@
       </div>
       <div class="modal-body">
         <h6 class="m">How many dice would you like to spend to enhance your defense?</h6>
+        <div class="form-group form-floating mb-3 mt-4">
+          <input type="number" class="form-control" id="d4" name="d4">
+          <label for="d4" class="form-label">D4</label>
+
+        </div>
+        <div class="form-group form-floating mb-3 mt-4">
+          <input type="number" class="form-control" id="d6" name="d6">
+          <label for="d6" class="form-label">D6</label>
+
+        </div>
+        <div class="form-group form-floating mb-3 mt-4">
+          <input type="number" class="form-control" id="d8" name="d8">
+          <label for="d8" class="form-label">D8</label>
+
+        </div>
+        <div class="form-group form-floating mb-3 mt-4">
+          <input type="number" class="form-control" id="d10" name="d10">
+          <label for="d10" class="form-label">D10</label>
+
+        </div>
+        <div class="form-group form-floating mb-3 mt-4">
+          <input type="number" class="form-control" id="d12" name="d12">
+          <label for="d12" class="form-label">D12</label>
+
+        </div>
+        <div class="form-group form-floating mb-3 mt-4">
+          <input type="number" class="form-control" id="d20" name="d20">
+          <label for="d20" class="form-label">D20</label>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -124,12 +153,12 @@
   var actionBtns = document.getElementById('action-buttons');
   var state = "{{state}}";
     /*if ( state === 'explore'){
-      exploreBtns.style.display = 'block';
-      actionBtns.style.display = 'none';
-  } else if ( state === 'battle'){
-      exploreBtns.style.display = 'none';
-      actionBtns.style.display = 'block';
-  }*/
+    exploreBtns.style.display = 'block';
+    actionBtns.style.display = 'none';
+} else if ( state === 'battle'){
+    exploreBtns.style.display = 'none';
+    actionBtns.style.display = 'block';
+}*/
 </script>
 <script src="{{ url_for('static', filename='/js/dungeon.js') }}"></script>
 {% endblock %}
