@@ -1361,7 +1361,7 @@ class Battle(Base):
 
         log = "You attempt to run away!"
 
-        result = randomgen.runAway(self.dungeon.player.get_speed(), self.enemy_speed)
+        result = randomgen.runAway(self.dungeon.player.get_speed(session), self.enemy_speed)
         log += '\n' + result[1]
         
         if result[0]:
