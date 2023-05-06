@@ -213,6 +213,7 @@ def randEnemy(floor: int) -> Dict[str, int | bytes | str]:
 
     statBudget = randint(int(iLvl * 0.9), int(iLvl * 1.1)) + 10
     enemyStats['enemy_hp'] = int(statBudget * healthWeight)
+    enemyStats['enemy_max_hp'] = enemyStats['enemy_hp']
     enemyStats['enemy_defense'] = int(statBudget * defenseWeight)
     enemyStats['enemy_speed'] = int(statBudget * speedWeight)
     

@@ -1011,7 +1011,7 @@ class Dungeon(Base):
 
             # Roll initiative
             if not randomgen.initiative(self.player.get_speed(session), battle.enemy_speed):
-                log += "\n" + battle.tick_until_player()
+                log += "\n" + battle.tick_until_player(session)
 
             return (0, log)
         elif newRoomType == 5:
@@ -1381,7 +1381,7 @@ class Battle(Base):
             session.commit()
         else:
             self.player_init = 1000000000
-            log += "\nFailure!\n" + self.tick_until_player()
+            log += "\nFailure!\n" + self.tick_until_player(session)
 
         return log
 

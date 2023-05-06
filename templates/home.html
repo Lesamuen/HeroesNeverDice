@@ -7,19 +7,22 @@
     <video autoplay muted onended="this.pause();" preload="auto" class="mb-4 mt-4">
         <source src="{{ url_for('static', filename='images/Heroes_Never_Dice_1.mp4') }}" type="video/mp4">
         <img src="{{ url_for('static', filename='images/Logo.png')}}" alt="Fallback Image">
-      </video>
-    <form action="{{url_for('display_dungeon')}}" method="get" class="w-100">
-        <button type="submit" class="btn custom-gold btn-lg btn-width mb-3 mt-4" onclick="gendungeon();" >PLAY</button>
-    </form>
+    </video>
     <script>
         function gendungeon()
         {
             var http = new XMLHttpRequest();
             http.open("POST", "/dungeon");
             http.setRequestHeader("Content-Type", "application/json");
+            http.onload = function(){
+                window.location.replace("{{url_for('display_dungeon')}}");
+            }
             http.send();
         }
     </script>
+    <div class="w-100">
+        <button type="submit" class="btn custom-gold btn-lg btn-width mb-3 mt-4" onclick="gendungeon()" >PLAY</button>
+    </div>
 </div>
 
 {% endblock %}
