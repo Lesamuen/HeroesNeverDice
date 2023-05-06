@@ -9,7 +9,7 @@
         <img src="{{ url_for('static', filename='images/Logo.png')}}" alt="Fallback Image">
       </video>
     <form action="{{url_for('display_dungeon')}}" method="get" class="w-100">
-        <button type="submit" class="btn custom-gold btn-lg btn-width mb-3 mt-4" onclick="gendungeon()" >PLAY</button>
+        <button type="submit" class="btn custom-gold btn-lg btn-width mb-3 mt-4" onclick="gendungeon();" >PLAY</button>
     </form>
     <script>
         function gendungeon()
@@ -17,10 +17,6 @@
             var http = new XMLHttpRequest();
             http.open("POST", "/dungeon");
             http.setRequestHeader("Content-Type", "application/json");
-            http.onload = function() {
-                if (this.status == 200){
-                }
-            };
             http.send();
         }
     </script>
