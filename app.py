@@ -115,9 +115,28 @@ def dungeon_move():
         return current_user.dungeon.exit(app.session)[1]
     return current_user.dungeon.move(app.session, direction)[1]
 
+@app.route('/dungeon/attack', methods = ['PUT'])
+@login_required
+def dungeon_attack():
+    spent = request.get_json()['spent_dice']
+    return current_user.dungeon.battle.attack(app.session, spent)
+    
+
+@app.route('/dungeon/defend', methods = ['PUT'])
+@login_required
+def dungeon_defense():
+    spent = request.get_json()['spent_dice']
+    return current_user.dungeon.battle.defense(app.session, spent)
+    
+
+@app.route('/dungeon/retreat', methods = ['PUT'])
+@login_required
+def dungeon_retreat():
+    return current_user.dungeon.battle.retreat(app.session)
 
 # Home page
 @app.route('/home')
+@login_required
 def home():
     if current_user.dungeon:
         return redirect(url_for('display_dungeon'))
@@ -183,6 +202,7 @@ def unequip_item():
 
 # How to Play
 @app.route('/howtoplay')
+@login_required
 def howtoplay():
     if current_user.dungeon:
         return redirect(url_for('display_dungeon'))
@@ -214,8 +234,43 @@ def display_dungeon():
         dice_values =['d4, d6, d8, d10, d12, d20']
         health = current_user.get_health(app.session)
         dice = current_user.get_dice()
+        totalattack = current_user.get_attack(app.session)
+        attack = totalattack[0]
+        active_attack= totalattack[1:]
+        defense = current_user.get_defense(app.session)
+        active_defense = current_user.get_active_defense(app.session)
+        speed = current_user.get_speed(app.session)
+        ### formatting with dice
+        dice_available=[]
+        dice_with_attack =[]
+        dice_with_defense=[]
+        ## max amount of dice - dice type for attack
+        for i in range(len(dice_values)):
+            if active_attack[i] != 0:
+                dice_with_attack.append(f'{active_attack[i]} - {dice_values[i]}')
+            else:
+                dice_with_attack.append(f'0 - {dice_values[i]}')
+        ## dice amount - dice type
+        for i in range(len(dice_values)):
+            if dice[i] != 0:
+                dice_available.append(f'{dice[i]} - {dice_values[i]}')
+            else:
+                dice_available.append(f'0 - {dice_values[i]}')
+        ## max amount of dice - dice type for defense
+        for i in range(len(dice_values)):
+            if active_defense[i] != 0:
+                dice_with_defense.append(f'{active_defense[i]} - {dice_values[i]}')
+            else:
+                dice_with_defense.append(f'0 - {dice_values[i]}')
 
-    return render_template('dungeon.html', map_data = map_data, dice_values=dice_values, health = health, dice = dice)
+        if current_user.dungeon.battle:
+            state = 'battle'
+        else:
+            state = 'explore'
+
+    return render_template('dungeon.html', map_data = map_data, dice_values=dice_values, 
+                           health = health, dice_available = dice_available, state=state, attack = attack, defense = defense,
+                           dice_with_defense = dice_with_defense, dice_with_attack = dice_with_attack, speed = speed)
 
 # Testing pagessssss
 @app.route('/test')
