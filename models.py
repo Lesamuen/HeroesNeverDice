@@ -1033,6 +1033,8 @@ class Battle(Base):
             session.execute(delete(Battle).where(Battle.dungeon_id == self.dungeon_id))
         else:
             log += "\nPlayer's turn."
+            # reset player temp defense upon start of next turn
+            self.player_temp_defense = 0
         
         session.commit()
 
@@ -1113,6 +1115,39 @@ class Battle(Base):
             # Simulate enemy turns until next player turn
             self.player_init = 1000000000
             log += '\n' + self.tick_until_player(session)
+
+        return log
+
+    def defense(self, session: Session, spend: Tuple[int, int, int, int, int, int]) -> str:
+        """
+        Player defense action. Instead of erroring, if amount spent is more than is possible from shield, then it is simply limited by shield amount.
+        player_init reset to max.
+
+        If enemy is dead, then battle ends and they drop their dice. If boss, then item dropped too and exit is unlocked.
+
+        Arguments:
+         - session: request context
+         - spend: how much the player is trying to spend
+
+        Returns:
+         - combat log
+        """
+
+        log = "You raise your guard!"
+
+        actualSpent = []
+        playerDefense = self.dungeon.player.get_active_defense()
+        for i in range(6):
+            actualSpent.append(spend[i] if spend[i] <= playerDefense[i] else playerDefense[i])
+        
+        result = randomgen.spendDice(self.dungeon.player.get_dice())
+        self.dungeon.player.dice = ints_to_dice(result[2])
+        log += '\n' + result[1]
+        self.player_temp_defense = result[0]
+
+        # Simulate enemy turns until next player turn
+        self.player_init = 1000000000
+        log += '\n' + self.tick_until_player(session)
 
         return log
 
