@@ -204,7 +204,11 @@ def account():
 def display_dungeon():
     if current_user.dungeon:
         map_data = current_user.dungeon.parse_map()
-        return render_template('dungeon.html', map_data = map_data)
+        dice_values =['d4, d6, d8, d10, d12, d20']
+        health = current_user.get_health(app.session)
+        dice = current_user.get_dice()
+
+    return render_template('dungeon.html', map_data = map_data, dice_values=dice_values, health = health, dice = dice)
 
 # Testing pagessssss
 @app.route('/test')
