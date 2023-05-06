@@ -1,3 +1,7 @@
+.dungeon-container{
+  overflow-y: auto;
+}
+
 #health-currency h3{
     display: inline-block;
     margin-right: 10px;
@@ -12,31 +16,43 @@
     height: 50px;
   }
   
-  .player {
-    background-color: red;
-    width: 50px;
-    height: 50px;
-  }
-  
-  .explored {
-    background-color: lightgray;
-    width: 50px;
-    height: 50px;
-  }
-  
-  .entrance {
-    background-color: blue;
-    width: 50px;
-    height: 50px;
-  }
-  
-  .exit {
-    background-color: green;
-    width: 50px;
-    height: 50px;
-  }
-  .blocked{
-    background-color: black;
-    width: 50px;
-    height: 50px;
-  }
+.player {
+  background-color: red;
+  width: 50px;
+  height: 50px;
+}
+
+.explored {
+  background-color: lightgray;
+  width: 50px;
+  height: 50px;
+}
+
+.entrance {
+  background-color: blue;
+  width: 50px;
+  height: 50px;
+}
+
+.exit {
+  background-color: green;
+  width: 50px;
+  height: 50px;
+}
+.blocked{
+  background-color: black;
+  width: 50px;
+  height: 50px;
+}
+
+#log{
+  white-space: pre-wrap;
+}
+
+#explore-buttons{
+  margin-bottom: 20px;
+}
+
+#action-buttons{
+  margin-bottom: 20px;
+}

@@ -57,3 +57,39 @@ function movedungeon(direction){
             };
             http.send(direction);
 }
+
+function attack(){
+    var http = new XMLHttpRequest();
+        http.open("PUT", "/dungeon/attack");
+        http.setRequestHeader("Content-Type", "application/json");
+        http.onload = function() {
+            if (this.status == 200){
+                $("#log").append(this.responseText + "\n");
+            }
+        };
+        http.send();
+}
+
+function defend(){
+    var http = new XMLHttpRequest();
+    http.open("PUT", "/dungeon/defend");
+    http.setRequestHeader("Content-Type", "application/json");
+    http.onload = function() {
+        if (this.status == 200){
+            $("#log").append(this.responseText + "\n");
+        }
+    };
+    http.send();
+}
+
+function retreat(){
+    var http = new XMLHttpRequest();
+        http.open("PUT", "/dungeon/retreat");
+        http.setRequestHeader("Content-Type", "application/json");
+        http.onload = function() {
+            if (this.status == 200){
+                $("#log").append(this.responseText + "\n");
+            }
+        };
+        http.send();
+}
