@@ -135,30 +135,20 @@ def market():
 def vault():
     if current_user.dungeon:
         return redirect(url_for('display_dungeon'))
-    #tosend = []
-    items = [ #testing tuple list
-    ('Sword of Fire', 'A blazing sword that burns all in its path.'),
-    ('Staff of Ice', 'A staff that can conjure freezing winds and icy shards.'),
-    ('Bow of Lightning', 'A bow that shoots bolts of lightning that never miss.'),
-    ('Dagger of Poison', 'A small dagger that can deliver lethal doses of poison.'),
-    ('Hammer of Thunder', 'A heavy hammer that can create shockwaves that stun foes.'),
-    ('Wand of Arcane Missiles', 'A wand that fires bolts of arcane energy.'),
-    ]
-    #item[0] is the name, item[1] is the description
-    tosend = items
-    # inv = current_user.get_unequipped()
-    # for i in inv:
-    #     tosend.append((i.item.name,i.item.desc()))
-    return render_template('vault.html', tosend = tosend)
+    tosend = []
+    inv = current_user.vault
+    for i in inv:
+        tosend.append((i.item_id,i.item.name,i.item.desc()))
+    return render_template('vault.html', inv = tosend)
 
 @app.route('/vault')
 def inventory():
     if current_user.dungeon:
         return redirect(url_for('display_dungeon'))
     toinv = []
-    inv = current_user.get_inventory()
+    inv = current_user.get_unequipped()
     for i in inv:
-        toinv.append((i.item.name,i.item.desc()))
+        toinv.append((i.item_id,i.item.name,i.item.desc()))
     return render_template('vault.html', inv = toinv)
 
 @app.route('/vault')

@@ -9,7 +9,6 @@
     <table class="table mt-4">
         <thead>
             <tr>
-                <th scope="col">#</th>
                 <th scope="col">Item</th>
                 <th scope="col">Action</th>
             </tr>
@@ -18,9 +17,9 @@
             {% for item in tosend %}
             <tr>
                 <td>{{ loop.index }}</td>
-                <td>    <span class = "description" data-toggle="tooltip" data-placement="right" title="{{ item[1] }}">{{ item[0] }} </span>
+                <td>    <span class = "description" data-toggle="tooltip" data-placement="right" title="{{ item[2] }}">{{ item[1] }} </span>
                         <td><button type="button" class="btn btn-primary equip-btn"
-                            onclick="equipItem('{{ item[0] }}')">Equip</button></td>
+                            onclick="equipItem({{ item[0] }})">Equip</button></td>
                     </td>
             </tr>
             {% endfor %}
@@ -31,7 +30,6 @@
     <table class="table mt-4">
         <thead>
             <tr>
-                <th scope="col">#</th>
                 <th scope="col">Item</th>
                 <th scope="col">Action</th>
             </tr>
@@ -53,7 +51,6 @@
     <table class="table mt-4">
         <thead>
             <tr>
-                <th scope="col">#</th>
                 <th scope="col">Item</th>
                 <th scope="col">Action</th>
             </tr>
