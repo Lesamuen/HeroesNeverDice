@@ -23,20 +23,29 @@
         {% endfor %}</h3>
         <h3>Speed: {{speed}}</h3>
     </div>
-    <div id="textbox">
-        <p id="log"></p>
-    </div>
-    <div id="map">
-        <table id="map-table"></table>
-    </div>
-    <div id="explore-buttons">
-        <h2>Explore</h2>
-        <button onclick="movedungeon(0)">Up</button>
-        <button onclick="movedungeon(3)">Left</button>
-        <button onclick="movedungeon(1)">Right</button>
-        <button onclick="movedungeon(2)">Down</button>
-        <button onclick="movedungeon(4)">Exit</button>
-    </div>
+    <div class="container-fluid">
+        <div class="row">
+          <div class="col-sm-6">
+            <div id="map">
+              <table id="map-table"></table>
+              <div id="explore-buttons">
+                <h2>Explore</h2>
+                <button onclick="movedungeon(0)">Up</button>
+                <button onclick="movedungeon(3)">Left</button>
+                <button onclick="movedungeon(1)">Right</button>
+                <button onclick="movedungeon(2)">Down</button>
+                <button onclick="movedungeon(4)">Exit</button>
+            </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div id="textbox">
+              <p id="log"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    
     <div id="action-buttons">
         <h2 >Action</h2>
         <button id="attack" data-bs-toggle="modal" data-bs-target="#attackconfirm">Attack</button>

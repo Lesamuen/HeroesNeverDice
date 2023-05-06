@@ -1464,16 +1464,14 @@ class Battle(Base):
         """
 
         # Drop all items
-        for item in session.scalars(select(ItemInv).where(ItemInv.owner_id == self.id)).all():
-            item.drop()
+        for item in session.scalars(select(ItemInv).where(ItemInv.owner_id == self.dungeon.player_id)).all():
+            item.drop(session)
 
         # Delete dungeon
         session.execute(delete(Dungeon).where(Dungeon.player_id == self.dungeon_id))
         session.execute(delete(Battle).where(Battle.dungeon_id == self.dungeon_id))
 
         session.commit()
-
-
 
 def login(session: Session, username: str, password: str) -> Player:
     """

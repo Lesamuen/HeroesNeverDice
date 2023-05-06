@@ -44,15 +44,26 @@ function getdungeon()
             };
             http.send();
         }
-
+var MAX_LOG_SIZE = 20;
+var numLines = 0;
 function movedungeon(direction){
             var http = new XMLHttpRequest();
             http.open("PUT", "/dungeon/move");
             http.setRequestHeader("Content-Type", "application/json");
-            http.onload = function() {
+            http.onload = function addtoLog(responseText) {
                 if (this.status == 200){
                     $("#log").append(this.responseText + "\n");
+                    numLines++;
                     getdungeon();
+                    if (numLines > MAX_LOG_SIZE){
+                        var lines = $("#log").html().split('\n');
+                        lines.splice(0, numlines - MAX_LOG_SIZE);
+                        $("#log").html(lines.join("\n"))
+                        numLines=MAX_LOG_SIZE;
+                    }
+                }
+                else if(this.status == 302){
+                    window.location.href = this.responseText;
                 }
             };
             http.send(direction);

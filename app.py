@@ -115,27 +115,44 @@ def dungeon_move():
         return current_user.dungeon.exit(app.session)[1]
     return current_user.dungeon.move(app.session, direction)[1]
 
-@app.route('/dungeon/attack', methods = ['PUT'])
+@app.route('/dungeon/attack', methods = ['PUT', 'GET'])
 @login_required
 def dungeon_attack():
     spent = request.get_json()['spent_dice']
-    return current_user.dungeon.battle.attack(app.session, spent)
+    
+    if not current_user.dungeon:
+        return url_for('home'), 302
+    result = current_user.dungeon.battle.attack(app.session, spent)
+    if current_user.dungeon.battle:
+        result += '\nCurrent hp: ' + str(current_user.dungeon.battle.player_hp)
+    return result
     
 
-@app.route('/dungeon/defend', methods = ['PUT'])
+@app.route('/dungeon/defend', methods = ['PUT', 'GET'])
 @login_required
 def dungeon_defense():
     spent = request.get_json()['spent_dice']
-    return current_user.dungeon.battle.defense(app.session, spent)
+     
+    if not current_user.dungeon:
+        return url_for('home'), 302
+    result = current_user.dungeon.battle.defense(app.session, spent)
+    if current_user.dungeon.battle:
+        result += '\nCurrent hp: ' + str(current_user.dungeon.battle.player_hp)
+    return result
     
 
-@app.route('/dungeon/retreat', methods = ['PUT'])
+@app.route('/dungeon/retreat', methods = ['PUT', 'GET'])
 @login_required
 def dungeon_retreat():
-    return current_user.dungeon.battle.retreat(app.session)
+    if not current_user.dungeon:
+        return url_for('home'), 302
+    result = current_user.dungeon.battle.retreat(app.session)
+    if current_user.dungeon.battle:
+        result += '\nCurrent hp: ' + str(current_user.dungeon.battle.player_hp)
+    return result
 
 # Home page
-@app.route('/home')
+@app.route('/home', methods=['GET', 'PUT'])
 @login_required
 def home():
     if current_user.dungeon:
