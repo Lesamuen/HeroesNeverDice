@@ -25,6 +25,7 @@ class Player(UserMixin, Base):
      - dungeon: reference to currently generated dungeon
 
     Methods:
+     - get_user: gets a Player by their id
      - check_password: checks password
      - change_password: changes password
      - get_id: return id
@@ -58,6 +59,22 @@ class Player(UserMixin, Base):
 
     dungeon: Mapped[Optional["Dungeon"]] = relationship(back_populates = "player")
     """If null, then currently in home/base"""
+
+    @staticmethod
+    def get_user(session: Session, id: int) -> 'Player':
+        """
+        Retrieves a Player by ID
+
+        Arguments:
+        - session: request context
+        - id: id of Player object
+
+        Returns:
+        - Player object with matching id
+        - None if no matching id
+        """
+
+        return session.execute(select(Player).where(Player.id == id)).scalar()
 
     def check_password(self, password: str) -> bool:
         """
@@ -1409,21 +1426,6 @@ class Battle(Base):
         session.commit()
 
 
-
-def getUser(session: Session, id: int) -> Player:
-    """
-    Retrieves a Player by ID
-
-    Arguments:
-     - session: request context
-     - id: id of Player object
-
-    Returns:
-     - Player object with matching id
-     - None if no matching id
-    """
-
-    return session.execute(select(Player).where(Player.id == id)).scalar()
 
 def login(session: Session, username: str, password: str) -> Player:
     """

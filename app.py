@@ -24,7 +24,7 @@ login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return models.getUser(app.session, user_id)
+    return models.Player.get_user(app.session, user_id)
 
 def redirect_login():
     return redirect(url_for('login_page'))
