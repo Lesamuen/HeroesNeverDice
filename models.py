@@ -268,6 +268,67 @@ class Player(UserMixin, Base):
                 defense.append(int.from_bytes(shield.dice_budget[i * 4 : (i + 1) * 4]))
             return tuple(defense)
 
+    # Inventory queries
+    def get_vault(self) -> List["Item"]:
+        """
+        Returns all items in vault, sorted by index.
+        """
+
+        vault = []
+        for item in self.vault:
+            vault.append(item.item)
+        return vault
+
+    def get_inv(self) -> List["Item"]:
+        """
+        Returns all unequipped items in inventory, sorted by index.
+        """
+
+        unequipped = []
+        for item in self.inventory:
+            if not item.equipped:
+                unequipped.append(item.item)
+        return unequipped
+
+    def get_hands(self) -> Tuple["Item" | None, "Item" | None]:
+        """
+        Returns items in hands. First hand always weapon (or none if nothing equipped). Second hand either second weapon, shield, or None if first weapon is two-handed.
+        """
+
+        weapons = []
+        shield = None
+        for item in self.inventory:
+            if item.equipped:
+                if item.item.itemType == 0:
+                    weapons.append(item.item)
+                elif item.item.itemType == 1:
+                    shield = item.item
+
+        hands = []
+        if len(weapons) > 0:
+            hands.append(weapons[0])
+        else:
+            hands.append(None)
+        if len(weapons) == 2:
+            hands.append(weapons[1])
+        elif shield:
+            hands.append(shield)
+        else:
+            hands.append(None)
+
+        return hands
+    
+    def get_armor(self) -> "Item" | None:
+        """
+        Returns armor equipped, or None if none equipped
+        """
+
+        for item in self.inventory:
+            if item.equipped and item.item.itemType == 2:
+                return item.item
+            
+        return None
+
 
 class Item(Base):
     """
