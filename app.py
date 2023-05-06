@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, jsonify
 from greenlet import getcurrent
 from flask_cors import CORS
 import database as db
@@ -104,7 +104,7 @@ def gen_dungeon():
         return "You're already in a dungeon!", 409
     else:
         ###TODO could use Jinja here
-        return models.Dungeon.new(app.session, current_user).parse_map()
+        return models.Dungeon.new(app.session, current_user).parse_map() 
 
 @app.route('/dungeon/move', methods = ['PUT'])
 @login_required
@@ -190,7 +190,9 @@ def account():
 #Dungeon display (temp)
 @app.route('/display_dungeon')
 def display_dungeon():
-    return render_template('dungeon.html')
+    if current_user.dungeon:
+        map_data = current_user.dungeon.parse_map()
+        return render_template('dungeon.html', map_data = map_data)
 
 # Testing pagessssss
 @app.route('/test')

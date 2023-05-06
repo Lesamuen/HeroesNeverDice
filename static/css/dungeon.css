@@ -1,0 +1,42 @@
+#health-currency h3{
+    display: inline-block;
+    margin-right: 10px;
+    margin-top: 10px;
+    font-size: 1em;
+    color: red;
+
+}
+.unexplored {
+    background-color: gray;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .player {
+    background-color: red;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .explored {
+    background-color: lightgray;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .entrance {
+    background-color: blue;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .exit {
+    background-color: green;
+    width: 50px;
+    height: 50px;
+  }
+  .blocked{
+    background-color: black;
+    width: 50px;
+    height: 50px;
+  }

@@ -1,31 +1,32 @@
-{% extends "dungeonbase.html" %}
-
-{% block title %}
-    Dungeon
-{% endblock %}
-
-{% block header %}
-{% endblock %}
+{% extends "dungeonbase.html" %}{% block title %}Dungeon{% endblock %}{% block header %}{% endblock %}
 
 {% block content %}
-    <div>
-        <h2>Current Health: {{ current_health }}</h2>
-        <h2>Current Currency: {{ current_currency }}</h2>
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='/css/dungeon.css')}}"
+/>
+
+<div class="text-light">
+    <div id="health-currency">
+        <h3>Health: {{health}}</h3>
+        <h3>Dice: {{currency }}</h3>
     </div>
-    <div>
-        <h2>Text from Flask Backend:</h2>
-        <p>{{ text_from_backend }}</p>
+    <div id="textbox">
+        <p id="log"></p>
     </div>
-    <div>
-        <h2>Movement</h2>
-        <button>Up</button>
-        <button>Down</button>
-        <button>Left</button>
-        <button>Right</button>
-        <button>Exit</button>
+    <div id="map">
+        <table id="map-table"></table>
     </div>
-    <div>
-        <h2>Actions</h2>
+    <div id="explore-buttons">
+        <h2>Explore</h2>
+        <button onclick="movedungeon(0)">Up</button>
+        <button onclick="movedungeon(3)">Left</button>
+        <button onclick="movedungeon(1)">Right</button>
+        <button onclick="movedungeon(2)">Down</button>
+        <button onclick="movedungeon(4)">Exit</button>
+    </div>
+    <div id="action-buttons">
+        <h2 >Action</h2>
         <button id="attack">Attack</button>
         <button id="defend">Defend</button>
         <button id="retreat">Retreat</button>
@@ -33,14 +34,20 @@
 </div>
 
 <script>
-    document.getElementById("attack").addEventListener("click", function() {
-        var num_dice = prompt("How many dice would you like to use for your attack?");
-        // Code to send num_dice to Flask backend goes here
-    });
-    
-    document.getElementById("defend").addEventListener("click", function() {
-        var num_dice = prompt("How many dice would you like to use for your defense?");
-        // Code to send num_dice to Flask backend goes here
-    });
+    var mapData = {{ map_data|tojson }};
 </script>
+
+<script>
+    var exploreBtns = document.getElementById('explore-buttons');
+    var actionBtns = document.getElementById('action-buttons');
+    var state = "explore";
+    if ( state === 'explore'){
+        exploreBtns.style.display = 'block';
+        actionBtns.style.display = 'none';
+    } else if ( state === 'battle'){
+        exploreBtns.style.display = 'none';
+        actionBtns.style.display = 'block';
+    }
+</script>
+<script src="{{ url_for('static', filename='/js/dungeon.js') }}"></script>
 {% endblock %}
