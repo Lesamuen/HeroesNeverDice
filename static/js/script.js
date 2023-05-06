@@ -9,7 +9,7 @@ function sellItem() {
     var itemPrice = document.getElementById("itemPrice").value;
 
     var xhttp = new XMLHttpRequest();
-    xhttp.open("POST", "http://127.0.0.1:5000/sell_item", true);
+    xhttp.open("POST", "/sell_item", true);
     xhttp.setRequestHeader("Content-type", "application/json");
     xhttp.onload = function () {
         var response = JSON.parse(this.responseText);
@@ -33,35 +33,33 @@ function buyItem() {
 
 }
 
-function equipItem() {
+function equipItem(id) {
     // Equip Item
     // items are found in the inventory list
     // items will appear in the list with an equip button next to them
     // if equip button is clicked, item will be equipped and stats will be updated into Equipped Items list
 
     var xhttp = new XMLHttpRequest();
-    xhttp.open("POST", "http://127.0.0.1:5000/equip_item", true);
+    xhttp.open("PUT", "/equip_item", true);
     xhttp.setRequestHeader("Content-type", "application/json");
     xhttp.onload = function () {
-        
-    
+        location.reload()
     }
-    const item = {"item.id": item.id};
-    xhttp.send(JSON.stringify(item));
+    xhttp.send(id);
 }
 
-function unequipItem() {
+function unequipItem(id) {
     // Unequip Item
     // items are found in the equipped items list
     // items will appear in the list with an unequip button next to them
     // if unequip button is clicked, item will be unequipped and stats will be updated into Inventory list
 
     var xhttp = new XMLHttpRequest();
-    xhttp.open("POST", "http://127.0.0.1:5000/unequip_item", true);
+    xhttp.open("PUT", "/unequip_item", true);
     xhttp.setRequestHeader("Content-type", "application/json");
     xhttp.onload = function () {
-
-    };
-    xhttp.send("item.name=" + item.name);
+        location.reload()
+    }
+    xhttp.send(id);
 
 }

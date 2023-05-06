@@ -14,12 +14,11 @@
             </tr>
         </thead>
         <tbody>
-            {% for item in tosend %}
+            {% for item in vault %}
             <tr>
-                <td>{{ loop.index }}</td>
                 <td>    <span class = "description" data-toggle="tooltip" data-placement="right" title="{{ item[2] }}">{{ item[1] }} </span>
                         <td><button type="button" class="btn btn-primary equip-btn"
-                            onclick="equipItem({{ item[0] }})">Equip</button></td>
+                            onclick="sellItem({{ item[0] }})">Sell</button></td>
                     </td>
             </tr>
             {% endfor %}
@@ -35,12 +34,11 @@
             </tr>
         </thead>
         <tbody>
-            {% for item in toinv %}
+            {% for item in inv %}
             <tr>
-                <td>{{ loop.index }}</td>
-                <td>    <span class = "description" data-toggle="tooltip" data-placement="right" title="{{ item[1] }}">{{ item[0] }} </span>
+                <td>    <span class = "description" data-toggle="tooltip" data-placement="right" title="{{ item[2] }}">{{ item[1] }} </span>
                         <td><button type="button" class="btn btn-primary equip-btn"
-                            onclick="equipItem('{{ item[0] }}')">Equip</button></td>
+                            onclick="equipItem({{ item[0] }})">Equip</button></td>
                     </td>
             </tr>
             {% endfor %}
@@ -56,15 +54,24 @@
             </tr>
         </thead>
         <tbody>
-            {% for item in toequip %}
             <tr>
-                <td>{{ loop.index }}</td>
-                <td>    <span class = "description" data-toggle="tooltip" data-placement="right" title="{{ item[1] }}">{{ item[0] }} </span>
+                <td>    <span class = "description" data-toggle="tooltip" data-placement="right" title="{{ mainhand[2] }}">Main Hand: {{ mainhand[1] }} </span>
                         <td><button type="button" class="btn btn-primary equip-btn"
-                            onclick="unequipItem('{{ item[0] }}')">Unequip</button></td>
-                    </td>
+                            onclick="unequipItem({{ mainhand[0] }})">Unequip</button></td>
+                </td>
             </tr>
-            {% endfor %}
+            <tr>
+                <td>    <span class = "description" data-toggle="tooltip" data-placement="right" title="{{ offhand[2] }}">Off-Hand: {{ offhand[1] }} </span>
+                        <td><button type="button" class="btn btn-primary equip-btn"
+                            onclick="unequipItem({{ offhand[0] }})">Unequip</button></td>
+                </td>
+            </tr>
+            <tr>
+                <td>    <span class = "description" data-toggle="tooltip" data-placement="right" title="{{ armor[2] }}">Armor: {{ armor[1] }} </span>
+                        <td><button type="button" class="btn btn-primary equip-btn"
+                            onclick="unequipItem({{ armor[0] }})">Unequip</button></td>
+                </td>
+            </tr>
         </tbody>
     </table> 
 

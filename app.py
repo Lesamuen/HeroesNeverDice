@@ -125,6 +125,7 @@ def home():
 
 # Market Page
 @app.route('/market')
+@login_required
 def market():
     if current_user.dungeon:
         return redirect(url_for('display_dungeon'))
@@ -132,39 +133,53 @@ def market():
 
 # Vault Page
 @app.route('/vault')
+@login_required
 def vault():
     if current_user.dungeon:
         return redirect(url_for('display_dungeon'))
-    tosend = []
-    inv = current_user.vault
-    for i in inv:
-        tosend.append((i.item_id,i.item.name,i.item.desc()))
-    return render_template('vault.html', inv = tosend)
+    
+    vaultDisplay = []
+    for item in current_user.vault:
+        vaultDisplay.append((item.item_id, item.item.name, item.item.desc()))
+    invDisplay = []
+    for item in current_user.get_unequipped():
+        invDisplay.append((item.item_id, item.item.name, item.item.desc()))
 
-@app.route('/vault')
-def inventory():
-    if current_user.dungeon:
-        return redirect(url_for('display_dungeon'))
-    toinv = []
-    inv = current_user.get_unequipped()
-    for i in inv:
-        toinv.append((i.item_id,i.item.name,i.item.desc()))
-    return render_template('vault.html', inv = toinv)
-
-@app.route('/vault')
-def equipped():
-    if current_user.dungeon:
-        return redirect(url_for('display_dungeon'))
-    toequip = []
     hands = current_user.get_hands()
+    if hands[0]:
+        mainhand = (hands[0].item_id, hands[0].item.name, hands[0].item.desc())
+    else:
+        mainhand = (-1, "Fists", "You are holding nothing in this hand.")
+    if hands[1]:
+        offhand = (hands[1].item_id, hands[1].item.name, hands[1].item.desc())
+    else:
+        offhand = (-1, "Fists", "You are holding nothing in this hand.")
     armor = current_user.get_armor()
+    if armor:
+        armor = (armor.item_id, armor.item.name, armor.item.desc())
+    else:
+        armor = (-1, "Nothing", "You are wearing nothing but rags.")
 
-    for i in hands:
-        toequip.append((i.item.name,i.item.desc()))
-    for i in armor:
-        toequip.append((i.item.name,i.item.desc()))
-    return render_template('vault.html', hands = toequip, armor = toequip)
+    return render_template('vault.html', vault = vaultDisplay, inv = invDisplay, mainhand = mainhand, offhand = offhand, armor = armor)
 
+# Inventory actions
+@app.route('/equip_item', methods = ['PUT'])
+@login_required
+def equip_item():
+    id = request.get_json()
+    item: models.ItemInv = current_user.get_inv_item(app.session, id)
+    if item:
+        item.equip(app.session)
+    return "Success", 200
+
+@app.route('/unequip_item', methods = ['PUT'])
+@login_required
+def unequip_item():
+    id = request.get_json()
+    item: models.ItemInv = current_user.get_inv_item(app.session, id)
+    if item:
+        item.unequip(app.session)
+    return "Success", 200
 
 # How to Play
 @app.route('/howtoplay')
@@ -175,6 +190,7 @@ def howtoplay():
 
 # Account Page
 @app.route('/account', methods=['GET', 'POST'])
+@login_required
 def account():
     if current_user.dungeon:
         return redirect(url_for('display_dungeon'))
@@ -191,6 +207,7 @@ def account():
 
 #Dungeon display (temp)
 @app.route('/display_dungeon')
+@login_required
 def display_dungeon():
     if current_user.dungeon:
         map_data = current_user.dungeon.parse_map()
