@@ -5,6 +5,7 @@ import database as db
 import models
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from sqlalchemy.orm import scoped_session
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Initialize Flask app
 app = Flask(__name__, template_folder = 'templates', static_folder = 'static')
@@ -38,7 +39,7 @@ def home_page():
 @app.route('/login', methods=['GET'])
 def login_page():
     if current_user.is_authenticated:
-        return redirect(url_for('home_page'))
+        return redirect(url_for('home'))
     return render_template('login.html')
 
 @app.route('/login', methods=['POST'])
@@ -53,7 +54,7 @@ def login():
 
     if player:
         login_user(player)
-        return redirect(url_for('home_page'))
+        return redirect(url_for('home'))
     
     return redirect(url_for('login_page'))
     
@@ -62,19 +63,19 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('login_page'))
+    return redirect(url_for('login'))
 
 @app.route('/register/', methods=['GET'])
 @app.route('/register', methods=['GET'])
 def register_page():
     if current_user.is_authenticated:
-        return redirect(url_for('home_page'))
+        return redirect(url_for('home'))
     return render_template('register.html')
 
 @app.route('/register', methods=['POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('home_page'))
+        return redirect(url_for('/home'))
     
     username = request.form.get('username')
     password = request.form.get('password')
@@ -83,7 +84,7 @@ def register():
 
     if player:
         login_user(player)
-        return redirect(url_for('home_page'))
+        return redirect(url_for('/home'))
     return "Username is taken!", 409
 
 # Dungeon routes
@@ -116,7 +117,56 @@ def dungeon_move():
         return current_user.dungeon.exit(app.session)[1]
     return current_user.dungeon.move(app.session, direction)[1]
 
-# Testing pages
+
+# Home page
+@app.route('/home')
+def home():
+    
+    return render_template('home.html')
+
+# Market Page
+@app.route('/market')
+def market():
+    return render_template('market.html')
+
+# Vault Page
+@app.route('/vault')
+def vault():
+    return render_template('vault.html')
+
+# How to Play
+@app.route('/howtoplay')
+def howtoplay():
+    return render_template('howtoplay.html')
+
+# Account Page
+@app.route('/account', methods=['GET', 'POST'])
+def account():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        confirmPassword = request.form['confirm-password']
+
+        if username:
+            current_user.username = username
+        if email:
+            current_user.email = email
+        if password and (password == confirmPassword):
+            current_user.password = generate_password_hash(password)
+        
+        db.session.commit()
+        return redirect(url_for(account))
+    return render_template('account.html')
+
+#Dungeon display (temp)
+@app.route('/display_dungeon')
+def display_dungeon():
+    images = ['d4.png', 'd6.png', 'd8.png', 'd10.png', 'd12.png', 'd20.png']
+    dice_values =[0, 2, 4, 6, 8, 1]
+    return render_template('dungeon.html', die_images = images, dice_values = dice_values,  builtins=__builtins__)
+
+# Testing pagessssss
 @app.route('/test')
 @app.route('/test/')
 @login_required

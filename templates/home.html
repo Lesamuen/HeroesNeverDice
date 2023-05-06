@@ -1,15 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-</head>
+<!-- Home page -->
+{% extends "homebase.html" %} {% block title %}Home{% endblock %} {% block header %} {% endblock %}
 
-<body>
-    <a href="/logout">Logout</a>
-    <br>
-    <a href="/test">Testing Hub</a>
-</body>
-</html>
+{% block content %}
+
+<div class="home-container text-center">
+    <video autoplay muted onended="this.pause();" preload="auto" class="mb-4 mt-4">
+        <source src="{{ url_for('static', filename='images/Heroes_Never_Dice_1.mp4') }}" type="video/mp4">
+        <img src="{{ url_for('static', filename='images/Logo.png')}}" alt="Fallback Image">
+      </video>
+    <form action="{{url_for('display_dungeon')}}" method="get" class="w-100">
+        <button type="submit" class="btn custom-gold btn-lg btn-width mb-3 mt-4">PLAY</button>
+    </form>
+</div>
+
+{% endblock %}

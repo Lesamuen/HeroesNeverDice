@@ -1,0 +1,69 @@
+{% extends "homebase.html" %} {% block title %}Account{% endblock %} {% block header %} {% endblock %}
+
+{% block content %}
+<div class="account-container">
+    <form method="POST" action="{{ url_for('account')}}" class="mt-5">
+        <div class="form-group form-floating mb-3 mt-3">
+            <input
+             type="text"
+             name="username"
+             id="username"
+             class="form-control"
+             value="{{current_user.username}}"
+            />
+            <label for="username ">Username</label>
+        </div>
+        <div class="form-group form-floating mb-3 mt-4">
+            <input
+             type="email"
+             name="email"
+             id="email"
+             class="form-control"
+             value="{{current_user.email}}"
+            />
+            <label for="email">Email</label>
+        </div>
+        <div class="form-group form-floating mb-3 mt-4">
+            <input
+             type="password"
+             name="password"
+             id="password"
+             class="form-control"
+            />
+            <label for="password">Password</label>
+        </div>
+        <div class="form-group form-floating mb-3 mt-4">
+            <input
+             type="password"
+             name="confirm-password"
+             id="confrim-password"
+             class="form-control"
+            />
+            <label for="confirm-password">Confirm Password</label>
+        </div>
+        <button
+         type="submit"
+         class="btn custom-gold btn-md mb-3 mt-4 float-right">Submit Changes</button>
+    </form>
+    <div class="wrap">
+        <button class="logout-btn" data-bs-toggle="modal" data-bs-target="#confirmlogout">LOGOUT</button>
+    </div>
+    <div class="modal fade" id="confirmlogout" tabindex="-1" aria-labelledby="confirmlogout" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Confirm Logout</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <h6 class="m">Are you sure you want to logout? </h6>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-danger" onclick="logout()">Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+</div>
+{% endblock %}
