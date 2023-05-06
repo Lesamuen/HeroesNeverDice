@@ -309,7 +309,7 @@ class Player(UserMixin, Base):
 
     def get_hands(self) -> Tuple["ItemInv | None", "ItemInv | None"]:
         """
-        Returns items in hands. First hand always weapon (or none if nothing equipped). Second hand either second weapon, shield, or None if first weapon is two-handed.
+        Returns items in hands. First hand always weapon (or none if nothing equipped). Second hand either second weapon, shield, or also first weapon if two-handed.
         """
 
         weapons = []
@@ -326,7 +326,9 @@ class Player(UserMixin, Base):
             hands.append(weapons[0])
         else:
             hands.append(None)
-        if len(weapons) == 2:
+        if len(weapons) == 1 and weapons[0].item.twoh:
+            hands.append(weapons[0])
+        elif len(weapons) == 2:
             hands.append(weapons[1])
         elif shield:
             hands.append(shield)
@@ -592,7 +594,6 @@ class ItemInv(Base):
     def drop(self, session: Session) -> None:
         """
         Destroys this item from inventory, whether by manual dropping or dropping upon death.
-        Does not commit.
         
         Arguments:
          - session: request context
@@ -601,18 +602,61 @@ class ItemInv(Base):
         itemDropped = self.item_id
         session.execute(delete(ItemInv).where(ItemInv.item_id == itemDropped))
         session.execute(delete(Item).where(Item.id == itemDropped))
+        session.commit()
 
     def equip(self, session: Session) -> None:
         """
-        
+        Tries to equip this item.
+
+        If armor, just replaces armor.
+        If weapon, tries to replace main hand. If one-handed, then tries off-hand if main hand full.
+        If shield, tries to replace off-hand.
+
+        Arguments:
+         - session: request context
         """
-        ### TODO
+
+        if self.equipped:
+            return
+        
+        # unequip
+        if self.item.itemType == 0:
+            # weapons
+            equipped = self.owner.get_hands()
+            if self.item.twoh:
+                if equipped[0]:
+                    equipped[0].equipped = False
+                if equipped[1]:
+                    equipped[1].equipped = False
+            else:
+                if equipped[0] and equipped[1]:
+                    equipped[1].equipped = False
+        elif self.item.itemType == 1:
+            # shield
+            equipped = self.owner.get_hands()
+            if equipped[1]:
+                equipped[1].equipped = False
+        elif self.item.itemType == 2:
+            equipped = self.owner.get_armor()
+            if equipped:
+                equipped.equipped = False
+                
+        self.equipped = True
+        session.commit()
+
         
     def unequip(self, session: Session) -> None:
         """
-        
+        Tries to unequip this item.
+
+        Arguments:
+         - session: request context
         """
-        ### TODO
+        if not self.equipped:
+            return
+        
+        self.equipped = False
+        session.commit()
 
 
 class ItemMarket(Base):
