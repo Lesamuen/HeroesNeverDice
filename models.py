@@ -139,16 +139,16 @@ class Player(UserMixin, Base):
             return 2
         if typeFrom < 0 or typeTo < 0 or typeFrom > 5 or typeTo > 5:
             return 3
-        diceFrom = int.from_bytes(self.dice[(typeFrom * 4) : (typeFrom * 4 + 4)])
+        diceFrom = int.from_bytes(self.dice[(typeFrom * 4) : (typeFrom * 4 + 4)], 'big')
         if diceFrom < amount:
             return 1
         
-        diceTo = int.from_bytes(self.dice[(typeTo * 4) : (typeTo * 4 + 4)])
+        diceTo = int.from_bytes(self.dice[(typeTo * 4) : (typeTo * 4 + 4)], 'big')
 
         diceFrom -= amount
         diceTo += amount * Player.split_conv[typeFrom][typeTo]
-        bytesFrom = diceFrom.to_bytes(4)
-        bytesTo = diceTo.to_bytes(4)
+        bytesFrom = diceFrom.to_bytes(4, 'big')
+        bytesTo = diceTo.to_bytes(4, 'big')
 
         newCurrency = bytearray(self.dice)
         newCurrency[typeFrom * 4] = bytesFrom[0]
@@ -184,16 +184,16 @@ class Player(UserMixin, Base):
         # Checks for invalidation
         if typeFrom < 0 or typeFrom > 4:
             return 2
-        diceFrom = int.from_bytes(self.dice[(typeFrom * 4) : (typeFrom * 4 + 4)])
+        diceFrom = int.from_bytes(self.dice[(typeFrom * 4) : (typeFrom * 4 + 4)], 'big')
         if diceFrom < amount * 2:
             return 1
         
-        diceTo = int.from_bytes(self.dice[(typeFrom * 4 + 4) : (typeFrom * 4 + 8)])
+        diceTo = int.from_bytes(self.dice[(typeFrom * 4 + 4) : (typeFrom * 4 + 8)], 'big')
 
         diceFrom -= amount * 2
         diceTo += amount
-        bytesFrom = diceFrom.to_bytes(4)
-        bytesTo = diceTo.to_bytes(4)
+        bytesFrom = diceFrom.to_bytes(4, 'big')
+        bytesTo = diceTo.to_bytes(4, 'big')
 
         newCurrency = bytearray(self.dice)
         newCurrency[typeFrom * 4] = bytesFrom[0]
@@ -284,13 +284,13 @@ class Player(UserMixin, Base):
         weapon1 = weapons[0]
         attack.append(weapon1.attack)
         for i in range(6):
-            attack.append(int.from_bytes(weapon1.dice_budget[i * 4 : (i + 1) * 4]))
+            attack.append(int.from_bytes(weapon1.dice_budget[i * 4 : (i + 1) * 4], 'big'))
 
         if len(weapons) == 2:
             weapon2 = weapons[1]
             attack[0] += weapon2.attack
             for i in range(6):
-                attack[i + 1] += (int.from_bytes(weapon2.dice_budget[i * 4 : (i + 1) * 4]))
+                attack[i + 1] += (int.from_bytes(weapon2.dice_budget[i * 4 : (i + 1) * 4], 'big'))
 
         return tuple(attack)
     
@@ -312,7 +312,7 @@ class Player(UserMixin, Base):
         else:
             defense = []
             for i in range(6):
-                defense.append(int.from_bytes(shield.dice_budget[i * 4 : (i + 1) * 4]))
+                defense.append(int.from_bytes(shield.dice_budget[i * 4 : (i + 1) * 4], 'big'))
             return tuple(defense)
 
     # Inventory queries
@@ -504,12 +504,12 @@ class ItemWeapon(Item):
         else:
             desc += 'ONE-HANDED\n'
         desc += 'ATK: ' + str(self.attack) + ' + '
-        desc += str(int.from_bytes(self.dice_budget[0:4])) + 'd4 + '
-        desc += str(int.from_bytes(self.dice_budget[4:8])) + 'd6 + '
-        desc += str(int.from_bytes(self.dice_budget[8:12])) + 'd8 + '
-        desc += str(int.from_bytes(self.dice_budget[12:16])) + 'd10 + '
-        desc += str(int.from_bytes(self.dice_budget[16:20])) + 'd12 + '
-        desc += str(int.from_bytes(self.dice_budget[20:24])) + 'd20'
+        desc += str(int.from_bytes(self.dice_budget[0:4], 'big')) + 'd4 + '
+        desc += str(int.from_bytes(self.dice_budget[4:8], 'big')) + 'd6 + '
+        desc += str(int.from_bytes(self.dice_budget[8:12], 'big')) + 'd8 + '
+        desc += str(int.from_bytes(self.dice_budget[12:16], 'big')) + 'd10 + '
+        desc += str(int.from_bytes(self.dice_budget[16:20], 'big')) + 'd12 + '
+        desc += str(int.from_bytes(self.dice_budget[20:24], 'big')) + 'd20'
 
         return desc
     
@@ -530,12 +530,12 @@ class ItemShield(Item):
     def desc(self) -> str:
         desc = super().desc()
         desc += 'DEF: '
-        desc += str(int.from_bytes(self.dice_budget[0:4])) + 'd4 + '
-        desc += str(int.from_bytes(self.dice_budget[4:8])) + 'd6 + '
-        desc += str(int.from_bytes(self.dice_budget[8:12])) + 'd8 + '
-        desc += str(int.from_bytes(self.dice_budget[12:16])) + 'd10 + '
-        desc += str(int.from_bytes(self.dice_budget[16:20])) + 'd12 + '
-        desc += str(int.from_bytes(self.dice_budget[20:24])) + 'd20'
+        desc += str(int.from_bytes(self.dice_budget[0:4], 'big')) + 'd4 + '
+        desc += str(int.from_bytes(self.dice_budget[4:8], 'big')) + 'd6 + '
+        desc += str(int.from_bytes(self.dice_budget[8:12], 'big')) + 'd8 + '
+        desc += str(int.from_bytes(self.dice_budget[12:16], 'big')) + 'd10 + '
+        desc += str(int.from_bytes(self.dice_budget[16:20], 'big')) + 'd12 + '
+        desc += str(int.from_bytes(self.dice_budget[20:24], 'big')) + 'd20'
 
         return desc
     
@@ -1544,7 +1544,7 @@ def dice_to_int(dice: bytes) -> Tuple[int, int, int, int, int, int]:
 
     dice_ints = []
     for i in range(6):
-        dice_ints.append(int.from_bytes(dice[i * 4 : (i + 1) * 4]))
+        dice_ints.append(int.from_bytes(dice[i * 4 : (i + 1) * 4], 'big'))
 
     return tuple(dice_ints)
 
@@ -1559,4 +1559,4 @@ def ints_to_dice(dice: Tuple[int, int, int, int, int, int]) -> bytes:
      - byte data containing dice
     """
 
-    return dice[0].to_bytes(4) + dice[1].to_bytes(4) + dice[2].to_bytes(4) + dice[3].to_bytes(4) + dice[4].to_bytes(4) + dice[5].to_bytes(4)
+    return dice[0].to_bytes(4, 'big') + dice[1].to_bytes(4, 'big') + dice[2].to_bytes(4, 'big') + dice[3].to_bytes(4, 'big') + dice[4].to_bytes(4, 'big') + dice[5].to_bytes(4, 'big')

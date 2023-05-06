@@ -86,7 +86,7 @@ def randItem(floor: int) -> Dict[str, int | bytes | str]:
             dice[diceType] += 1
         # conv to byteform
         for i in range(6):
-            dice[i] = dice[i].to_bytes(4)
+            dice[i] = dice[i].to_bytes(4, 'big')
         itemStats['dice_budget'] = dice[0] + dice[1] + dice[2] + dice[3] + dice[4] + dice[5]
 
         # if two-handed, base attack * 2.5
@@ -112,7 +112,7 @@ def randItem(floor: int) -> Dict[str, int | bytes | str]:
 
         # conv to byteform
         for i in range(6):
-            dice[i] = dice[i].to_bytes(4)
+            dice[i] = dice[i].to_bytes(4, 'big')
         itemStats['dice_budget'] = dice[0] + dice[1] + dice[2] + dice[3] + dice[4] + dice[5]
 
         return itemStats
@@ -225,7 +225,7 @@ def randEnemy(floor: int) -> Dict[str, int | bytes | str]:
         dice[diceType] += 1
     # conv to byteform
     for i in range(6):
-        dice[i] = dice[i].to_bytes(4)
+        dice[i] = dice[i].to_bytes(4, 'big')
     enemyStats['enemy_value'] = dice[0] + dice[1] + dice[2] + dice[3] + dice[4] + dice[5]
     enemyStats['enemy_pool'] = enemyStats['enemy_value']
     
@@ -237,7 +237,7 @@ def randEnemy(floor: int) -> Dict[str, int | bytes | str]:
         dice[diceType] += 1
     # conv to byteform
     for i in range(6):
-        dice[i] = dice[i].to_bytes(4)
+        dice[i] = dice[i].to_bytes(4, 'big')
     enemyStats['enemy_spend'] = dice[0] + dice[1] + dice[2] + dice[3] + dice[4] + dice[5]
 
     return enemyStats
