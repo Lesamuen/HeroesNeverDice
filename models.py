@@ -265,17 +265,7 @@ class Player(UserMixin, Base):
             return tuple(defense)
 
     # Inventory queries
-    def get_vault(self) -> List["Item"]:
-        """
-        Returns all items in vault, sorted by index.
-        """
-
-        vault = []
-        for item in self.vault:
-            vault.append(item.item)
-        return vault
-
-    def get_inv(self) -> List["Item"]:
+    def get_uneuipped(self) -> List["ItemInv"]:
         """
         Returns all unequipped items in inventory, sorted by index.
         """
@@ -283,10 +273,10 @@ class Player(UserMixin, Base):
         unequipped = []
         for item in self.inventory:
             if not item.equipped:
-                unequipped.append(item.item)
+                unequipped.append(item)
         return unequipped
 
-    def get_hands(self) -> Tuple["Item | None", "Item | None"]:
+    def get_hands(self) -> Tuple["ItemInv | None", "ItemInv | None"]:
         """
         Returns items in hands. First hand always weapon (or none if nothing equipped). Second hand either second weapon, shield, or None if first weapon is two-handed.
         """
@@ -296,9 +286,9 @@ class Player(UserMixin, Base):
         for item in self.inventory:
             if item.equipped:
                 if item.item.itemType == 0:
-                    weapons.append(item.item)
+                    weapons.append(item)
                 elif item.item.itemType == 1:
-                    shield = item.item
+                    shield = item
 
         hands = []
         if len(weapons) > 0:
@@ -314,14 +304,14 @@ class Player(UserMixin, Base):
 
         return hands
     
-    def get_armor(self) -> "Item | None":
+    def get_armor(self) -> "ItemInv | None":
         """
         Returns armor equipped, or None if none equipped
         """
 
         for item in self.inventory:
             if item.equipped and item.item.itemType == 2:
-                return item.item
+                return item
             
         return None
 
