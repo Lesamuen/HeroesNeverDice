@@ -1123,8 +1123,6 @@ class Battle(Base):
         Player defense action. Instead of erroring, if amount spent is more than is possible from shield, then it is simply limited by shield amount.
         player_init reset to max.
 
-        If enemy is dead, then battle ends and they drop their dice. If boss, then item dropped too and exit is unlocked.
-
         Arguments:
          - session: request context
          - spend: how much the player is trying to spend
@@ -1148,6 +1146,45 @@ class Battle(Base):
         # Simulate enemy turns until next player turn
         self.player_init = 1000000000
         log += '\n' + self.tick_until_player(session)
+
+        return log
+
+    def retreat(self, session: Session) -> str:
+        """
+        Player retreat action.
+        If successful, battle ends, but player moved to previous room and room is blocked off.
+        If failed, player_init reset to max
+
+        Arguments:
+         - session: request context
+
+        Returns:
+         - combat log
+        """
+
+        log = "You attempt to run away!"
+
+        result = randomgen.runAway(self.dungeon.player.get_speed(), self.enemy_speed)
+        log += '\n' + result[1]
+        
+        if result[0]:
+            log += '\nSuccess! You retreat back the way you came...'
+
+            # set blocked on this room
+            row = self.dungeon.position & 15 #????xxxx
+            col = self.dungeon.position >> 4 #xxxx????
+            editableFloor = bytearray(self.dungeon.floor_data)
+            editableFloor[row * 10 + col] = editableFloor[row * 10 + col] | 128 #10000000 set blocked bit
+            self.dungeon.floor_data = editableFloor
+
+            # return to prev pos
+            self.dungeon.position = self.prev_pos
+            
+            session.execute(delete(Battle).where(Battle.dungeon_id == self.dungeon_id))
+            session.commit()
+        else:
+            self.player_init = 1000000000
+            log += "\nFailure!\n" + self.tick_until_player()
 
         return log
 
