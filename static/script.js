@@ -1,3 +1,7 @@
+$(document).ready(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+});
+
 function sellItem() {
     // Sell Item in market place 
     // can only sell items that are in the list of items in inventory

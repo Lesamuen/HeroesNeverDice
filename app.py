@@ -131,11 +131,42 @@ def market():
 # Vault Page
 @app.route('/vault')
 def vault():
-    tosend = []
-    inv = current_user.get_unequipped()
+    #tosend = []
+    items = [ #testing tuple list
+    ('Sword of Fire', 'A blazing sword that burns all in its path.'),
+    ('Staff of Ice', 'A staff that can conjure freezing winds and icy shards.'),
+    ('Bow of Lightning', 'A bow that shoots bolts of lightning that never miss.'),
+    ('Dagger of Poison', 'A small dagger that can deliver lethal doses of poison.'),
+    ('Hammer of Thunder', 'A heavy hammer that can create shockwaves that stun foes.'),
+    ('Wand of Arcane Missiles', 'A wand that fires bolts of arcane energy.'),
+    ]
+    #item[0] is the name, item[1] is the description
+    tosend = items
+    # inv = current_user.get_unequipped()
+    # for i in inv:
+    #     tosend.append((i.item.name,i.item.desc()))
+    return render_template('vault.html', tosend = tosend)
+
+@app.route('/vault')
+def inventory():
+    toinv = []
+    inv = current_user.get_inventory()
     for i in inv:
-        tosend.append((i.item.name,i.item.desc()))
-    return render_template('vault.html', inv = tosend)
+        toinv.append((i.item.name,i.item.desc()))
+    return render_template('vault.html', inv = toinv)
+
+@app.route('/vault')
+def equipped():
+    toequip = []
+    hands = current_user.get_hands()
+    armor = current_user.get_armor()
+
+    for i in hands:
+        toequip.append((i.item.name,i.item.desc()))
+    for i in armor:
+        toequip.append((i.item.name,i.item.desc()))
+    return render_template('vault.html', hands = toequip, armor = toequip)
+
 
 # How to Play
 @app.route('/howtoplay')
