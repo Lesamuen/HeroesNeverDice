@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-databaseEngine = create_engine("sqlite:///instance/db.sqlite", echo = True)
+databaseEngine = create_engine("sqlite:///instance/db.sqlite")
 
 databaseSession = sessionmaker(databaseEngine, autocommit = False, autoflush = False)
 

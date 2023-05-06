@@ -2,35 +2,33 @@ $(document).ready(function () {
     $('[data-toggle="tooltip"]').tooltip();
 });
 
-function sellItem() {
+function sellItem(id) {
     // Sell Item in market place 
     // can only sell items that are in the list of items in inventory
-    var itemName = document.getElementById("itemName").value;
-    var itemPrice = document.getElementById("itemPrice").value;
-
     var xhttp = new XMLHttpRequest();
-    xhttp.open("POST", "/sell_item", true);
+    xhttp.open("PUT", "/sell_item", true);
     xhttp.setRequestHeader("Content-type", "application/json");
     xhttp.onload = function () {
-        var response = JSON.parse(this.responseText);
-        if (response["status"] == "success") {
-            alert("Item has been sold");
-        } else {
-            alert("Item has not been sold");
-        }
+        location.reload()
     }
-    const item = {"item.name": itemName, "item.price": itemPrice};
-    xhttp.send(JSON.stringify(item));
+    xhttp.send(JSON.stringify({id: id, price: parseInt($('#sellPrice').val())}));
     
 }
 
 
-function buyItem() {
+function buyItem(id) {
     // Buy Item in market place 
     // can only buy items that are in the list of items for sale
     // items will appear in the list with a buy button next to them
     // need to get function to display list of items in market
 
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("PUT", "/buy_item", true);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.onload = function () {
+        location.reload()
+    }
+    xhttp.send(JSON.stringify({id: id, paying: [parseInt($('#buyd4').val()) , parseInt($('#buyd6').val()), parseInt($('#buyd8').val()), parseInt($('#buyd10').val()), parseInt($('#buyd12').val()), parseInt($('#buyd20').val())]}));
 }
 
 function equipItem(id) {
@@ -62,4 +60,24 @@ function unequipItem(id) {
     }
     xhttp.send(id);
 
+}
+
+function moveToVault(id){
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("PUT", "/move_vault", true);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.onload = function () {
+        location.reload()
+    }
+    xhttp.send(id);
+}
+
+function moveToInv(id){
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("PUT", "/move_inv", true);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.onload = function () {
+        location.reload()
+    }
+    xhttp.send(id);
 }

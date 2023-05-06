@@ -610,8 +610,8 @@ class ItemVault(Base):
          - session: request context
         """
 
-        session.execute(insert(ItemVault).values(item_id = self.item_id, owner_id = self.owner_id, price = price))
-        session.execute(delete(ItemMarket).where(ItemMarket.item_id == self.item_id))
+        session.execute(insert(ItemMarket).values(item_id = self.item_id, owner_id = self.owner_id, price = price))
+        session.execute(delete(ItemVault).where(ItemVault.item_id == self.item_id))
         session.commit()
     
 
@@ -738,6 +738,7 @@ class ItemMarket(Base):
 
     Methods:
      - get_listing: get a listing directly by its item id
+     - get_all_listings: get all listings
      - unlist: take item off of market back into vault
      - buy: purchase an item
     """
@@ -768,6 +769,20 @@ class ItemMarket(Base):
         """
 
         return session.execute(select(ItemMarket).where(ItemMarket.item_id == id)).scalar()
+
+    @staticmethod
+    def get_all_listings(session: Session) -> List['ItemMarket']:
+        """
+        Returns all listings available
+
+        Arguments:
+         - session: request context
+        
+        Returns:
+         - all listings
+        """
+
+        return session.execute(select(ItemMarket)).scalars()
 
     def unlist(self, session: Session) -> None:
         """
@@ -802,7 +817,7 @@ class ItemMarket(Base):
             return False
 
         # test if player even has enough currency
-        customerCurrency = customer.get_dice()
+        customerCurrency = list(customer.get_dice())
         for i in range(6):
             if paying[i] > customerCurrency[i]:
                 return False
@@ -816,7 +831,7 @@ class ItemMarket(Base):
         
         # if overpaying, do nothing special because customer didn't do math lol
         # transfer dice from customer to owner, then transfer item from owner to customer's vault
-        ownerCurrency = self.owner.get_dice()
+        ownerCurrency = list(self.owner.get_dice())
         for i in range(6):
             customerCurrency[i] -= paying[i]
             ownerCurrency[i] += paying[i]

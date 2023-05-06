@@ -6,6 +6,7 @@
 <div id="vault-container">
     <h2> Vault </h2>
 
+    <input id="sellPrice" placeholder="Price in d4s">
     <table class="table mt-4">
         <thead>
             <tr>
@@ -19,6 +20,9 @@
                 <td>    <span class = "description" data-toggle="tooltip" data-placement="right" title="{{ item[2] }}">{{ item[1] }} </span>
                         <td><button type="button" class="btn btn-primary equip-btn"
                             onclick="sellItem({{ item[0] }})">Sell</button></td>
+                    </td>
+                    <td><button type="button" class="btn btn-primary equip-btn"
+                        onclick="moveToInv({{ item[0] }})">Move</button></td>
                     </td>
             </tr>
             {% endfor %}
@@ -36,9 +40,13 @@
         <tbody>
             {% for item in inv %}
             <tr>
-                <td>    <span class = "description" data-toggle="tooltip" data-placement="right" title="{{ item[2] }}">{{ item[1] }} </span>
-                        <td><button type="button" class="btn btn-primary equip-btn"
+                <td><span class = "description" data-toggle="tooltip" data-placement="right" title="{{ item[2] }}">{{ item[1] }} </span>
+                    <td>
+                        <button type="button" class="btn btn-primary equip-btn"
                             onclick="equipItem({{ item[0] }})">Equip</button></td>
+                    </td>
+                    <td><button type="button" class="btn btn-primary equip-btn"
+                        onclick="moveToVault({{ item[0] }})">Move</button></td>
                     </td>
             </tr>
             {% endfor %}
