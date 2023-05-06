@@ -3,34 +3,15 @@
 {% block content %}
 <div class="account-container">
     <form method="POST" action="{{ url_for('account')}}" class="mt-5">
-        <div class="form-group form-floating mb-3 mt-3">
-            <input
-             type="text"
-             name="username"
-             id="username"
-             class="form-control"
-             value="{{current_user.username}}"
-            />
-            <label for="username ">Username</label>
-        </div>
-        <div class="form-group form-floating mb-3 mt-4">
-            <input
-             type="email"
-             name="email"
-             id="email"
-             class="form-control"
-             value="{{current_user.email}}"
-            />
-            <label for="email">Email</label>
-        </div>
+        <p>Welcome {{user}}</p>
         <div class="form-group form-floating mb-3 mt-4">
             <input
              type="password"
-             name="password"
-             id="password"
+             name="current-password"
+             id="current-password"
              class="form-control"
             />
-            <label for="password">Password</label>
+            <label for="current-password">Current Password</label>
         </div>
         <div class="form-group form-floating mb-3 mt-4">
             <input
@@ -41,9 +22,18 @@
             />
             <label for="confirm-password">Confirm Password</label>
         </div>
+        <div class="form-group form-floating mb-3 mt-3">
+          <input
+           type="password"
+           name="new-password"
+           id="new-password"
+           class="form-control"
+          />
+          <label for="new-password">New Password</label>
+      </div>
         <button
          type="submit"
-         class="btn custom-gold btn-md mb-3 mt-4 float-right">Submit Changes</button>
+         class="btn custom-gold btn-md mb-3 mt-4 float-right">Change Password</button>
     </form>
     <div class="wrap">
         <button class="logout-btn" data-bs-toggle="modal" data-bs-target="#confirmlogout">LOGOUT</button>
@@ -65,5 +55,10 @@
           </div>
         </div>
       </div>
+      <script>
+        function logout(){
+          window.location.href = "{{ url_for('logout') }}";
+        }
+      </script>
 </div>
 {% endblock %}

@@ -144,27 +144,20 @@ def howtoplay():
 def account():
     if request.method == 'POST':
         username = request.form['username']
-        email = request.form['email']
         password = request.form['password']
         confirmPassword = request.form['confirm-password']
 
-        if username:
-            current_user.username = username
-        if email:
-            current_user.email = email
         if password and (password == confirmPassword):
             current_user.password = generate_password_hash(password)
         
         db.session.commit()
         return redirect(url_for(account))
-    return render_template('account.html')
+    return render_template('account.html', user = current_user.username)
 
 #Dungeon display (temp)
 @app.route('/display_dungeon')
 def display_dungeon():
-    images = ['d4.png', 'd6.png', 'd8.png', 'd10.png', 'd12.png', 'd20.png']
-    dice_values =[0, 2, 4, 6, 8, 1]
-    return render_template('dungeon.html', die_images = images, dice_values = dice_values,  builtins=__builtins__)
+    return render_template('dungeon.html')
 
 # Testing pagessssss
 @app.route('/test')
