@@ -3,6 +3,7 @@ from sqlalchemy import ForeignKey, select, insert, update, delete
 from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional, Tuple, Dict
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from database import Base
 import randomgen
@@ -265,7 +266,7 @@ class Player(UserMixin, Base):
             return tuple(defense)
 
     # Inventory queries
-    def get_uneuipped(self) -> List["ItemInv"]:
+    def get_unequipped(self) -> List["ItemInv"]:
         """
         Returns all unequipped items in inventory, sorted by index.
         """
