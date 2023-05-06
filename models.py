@@ -1255,7 +1255,7 @@ class Battle(Base):
         log = "You strike at the " + self.enemy_name + "!"
 
         actualSpent = []
-        playerAttack = self.dungeon.player.get_attack()
+        playerAttack = self.dungeon.player.get_attack(session)
         for i in range(6):
             actualSpent.append(spend[i] if spend[i] <= playerAttack[i + 1] else playerAttack[i + 1])
         
@@ -1331,7 +1331,7 @@ class Battle(Base):
         log = "You raise your guard!"
 
         actualSpent = []
-        playerDefense = self.dungeon.player.get_active_defense()
+        playerDefense = self.dungeon.player.get_active_defense(session)
         for i in range(6):
             actualSpent.append(spend[i] if spend[i] <= playerDefense[i] else playerDefense[i])
         
@@ -1442,7 +1442,7 @@ class Battle(Base):
             log += "\nThe attack glances off your impeccable defense!"
         else:
             # mitigate with player defense
-            mitigatedDamage = attack[0] - self.player_temp_defense - self.dungeon.player.get_defense()
+            mitigatedDamage = attack[0] - self.player_temp_defense - self.dungeon.player.get_defense(session)
             self.player_temp_defense = 0
             if mitigatedDamage <= 0:
                 log += "\nThe attack fails to penetrate your armor!"
