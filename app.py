@@ -165,7 +165,11 @@ def home():
 def market():
     if current_user.dungeon:
         return redirect(url_for('display_dungeon'))
-    return render_template('market.html')
+    listings = [] 
+    for item in models.ItemMarket.get_all_listings(app.session):
+        listings.append((item.owner.username, item.item.name, item.price, item.item_id))
+
+    return render_template('market.html', market = listings)
 
 # Vault Page
 @app.route('/vault')
@@ -199,6 +203,24 @@ def vault():
     return render_template('vault.html', vault = vaultDisplay, inv = invDisplay, mainhand = mainhand, offhand = offhand, armor = armor)
 
 # Inventory actions
+@app.route('/move_vault', methods = ['PUT'])
+@login_required
+def move_vault():
+    id = request.get_json()
+    item: models.ItemInv = current_user.get_inv_item(app.session, id)
+    if item:
+        item.move_vault(app.session)
+    return "Success", 200
+
+@app.route('/move_inv', methods = ['PUT'])
+@login_required
+def move_inv():
+    id = request.get_json()
+    item: models.ItemVault = current_user.get_vault_item(app.session, id)
+    if item:
+        item.move_inv(app.session)
+    return "Success", 200
+
 @app.route('/equip_item', methods = ['PUT'])
 @login_required
 def equip_item():
@@ -215,6 +237,28 @@ def unequip_item():
     item: models.ItemInv = current_user.get_inv_item(app.session, id)
     if item:
         item.unequip(app.session)
+    return "Success", 200
+
+@app.route('/buy_item', methods = ['PUT'])
+@login_required
+def buy_item():
+    id = request.get_json()['id']
+    paying = request.get_json()['paying']
+    item = models.ItemMarket.get_listing(app.session, id)
+    if item:
+        item.buy(app.session, current_user, paying)
+
+    return "Success", 200
+
+@app.route('/sell_item', methods = ['PUT'])
+@login_required
+def sell_item():
+    id = request.get_json()['id']
+    price = request.get_json()['price']
+    item = current_user.get_vault_item(app.session, id)
+    if item:
+        item.list(app.session, price)
+
     return "Success", 200
 
 # How to Play

@@ -6,13 +6,17 @@
 <div id="market-container">
     <h1>Market</h1>
 
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sellModal">
-        Sell Item
-    </button>
+    <input id="buyd4" placeholder="d4">
+    <input id="buyd6" placeholder="d6">
+    <input id="buyd8" placeholder="d8">
+    <input id="buyd10" placeholder="d10">
+    <input id="buyd12" placeholder="d12">
+    <input id="buyd20" placeholder="d20">
 
     <table class="table mt-4">
         <thead>
             <tr>
+                <th scope="col">Seller</th>
                 <th scope="col">Item</th>
                 <th scope="col">Price</th>
                 <th scope="col">Action</th>
@@ -21,44 +25,13 @@
         <tbody>
             {% for item in market %} 
             <tr>
-                <td>{{item}}</td>
-                
-                <td><button type="button" class="btn btn-primary">Buy</button></td>
+                <td>{{item[0]}}</td>
+                <td>{{item[1]}}</td>
+                <td>{{item[2]}}</td>
+                <td><button type="button" class="btn btn-primary" onclick="buyItem({{item[3]}})">Buy</button></td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-
-<!-- Sell modal -->
-<div class="modal fade" id="sellModal" tabindex="-1" aria-labelledby="sellModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="sellModalLabel">Sell Item</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label for="itemName" class="col-form-label">Item:</label>
-                        <select class="form-select" id="itemName">
-                            {% for item in inventory %}
-                            <option value="{{ item }}">{{ item }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="price" class="col-form-label">Price:</label>
-                        <input type="text" class="form-control" id="price">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick = "sellItem()" >Sell Item</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 {% endblock %}
