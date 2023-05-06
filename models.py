@@ -25,6 +25,8 @@ class Player(UserMixin, Base):
      - dungeon: reference to currently generated dungeon
 
     Methods:
+     - check_password: checks password
+     - change_password: changes password
      - get_id: return id
      - get_dice: return currency as ints
      - split_dice: split currency into lower currency
@@ -56,6 +58,31 @@ class Player(UserMixin, Base):
 
     dungeon: Mapped[Optional["Dungeon"]] = relationship(back_populates = "player")
     """If null, then currently in home/base"""
+
+    def check_password(self, password: str) -> bool:
+        """
+        Checks the given password against this user.
+
+        Arguments:
+         - password: password to check
+        
+        Returns:
+         - whether password is correct
+        """
+
+        return check_password_hash(self.password, password)
+
+    def change_password(self, session: Session, newPassword: str) -> None:
+        """
+        Changes user's password to given one.
+
+        Arguments:
+         - session: request context
+         - newPassword: new password to change to
+        """
+
+        self.password = generate_password_hash(newPassword)
+        session.commit()
 
     def get_id(self):
         return str(self.id)
@@ -1301,7 +1328,10 @@ def login(session: Session, username: str, password: str) -> Player:
      - None if no matching username or incorrect password
     """
 
-    return session.execute(select(Player).where(Player.username == username, Player.password == password)).scalar()
+    user = session.execute(select(Player).where(Player.username == username)).scalar()
+    if user and user.check_password(password):
+        return user
+    return None
 
 def register(session: Session, username: str, password: str) -> Player:
     """
@@ -1318,7 +1348,7 @@ def register(session: Session, username: str, password: str) -> Player:
     
     # Create new user
     try:
-        newUser = session.execute(insert(Player).values(username = username, password = password).returning(Player)).scalar()
+        newUser = session.execute(insert(Player).values(username = username, password = generate_password_hash(password)).returning(Player)).scalar()
         session.commit()
     except IntegrityError:
         # If username already taken

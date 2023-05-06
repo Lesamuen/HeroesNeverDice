@@ -143,15 +143,14 @@ def howtoplay():
 @app.route('/account', methods=['GET', 'POST'])
 def account():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        currentPassword = request.form['current-password']
+        newPassword = request.form['new-password']
         confirmPassword = request.form['confirm-password']
 
-        if password and (password == confirmPassword):
-            current_user.password = generate_password_hash(password)
+        if newPassword and newPassword == confirmPassword and current_user.check_password(currentPassword):
+            current_user.change_password(app.session, newPassword)
         
-        db.session.commit()
-        return redirect(url_for(account))
+        return redirect(url_for('account'))
     return render_template('account.html', user = current_user.username)
 
 #Dungeon display (temp)
