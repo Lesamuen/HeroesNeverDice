@@ -1,120 +1,133 @@
 {% extends "dungeonbase.html" %}{% block title %}Dungeon{% endblock %}{% block header %}{% endblock %}
 
 {% block content %}
-<link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='/css/dungeon.css')}}"
-/>
+<link rel="stylesheet" href="{{ url_for('static', filename='/css/dungeon.css')}}" />
 
 <div class="text-light">
-    <div id="health-currency">
-        <h3>Health: {{health}}</h3>
-        <h3>Dice: {% for dice in dice_available %}
-            {{dice}}
-        {% endfor %}</h3>
-        <h3>Attack: {{attack}}</h3>
-        <h3>Max Attack:{% for dice in dice_with_attack %}
-                {{dice}}
-            {% endfor %}
-        </h3>
-        <h3>Defense: {{defense}}</h3>
-        <h3>Max Defense:{% for dice in dice_with_defense %}
-            {{dice}}
-        {% endfor %}</h3>
-        <h3>Speed: {{speed}}</h3>
-    </div>
-    <div class="container-fluid">
-        <div class="row">
-          <div class="col-sm-6">
-            <div id="map">
-              <table id="map-table"></table>
-              <div id="explore-buttons">
-                <h2>Explore</h2>
-                <button onclick="movedungeon(0)">Up</button>
-                <button onclick="movedungeon(3)">Left</button>
-                <button onclick="movedungeon(1)">Right</button>
-                <button onclick="movedungeon(2)">Down</button>
-                <button onclick="movedungeon(4)">Exit</button>
-            </div>
-            </div>
-          </div>
-          <div class="col-sm-6">
-            <div id="textbox">
-              <p id="log"></p>
-            </div>
+  <div id="health-currency">
+    <h3>Health: {{health}}</h3>
+    <h3>Dice: {% for dice in dice_available %}
+      {{dice}}
+      {% endfor %}</h3>
+    <h3>Attack: {{attack}}</h3>
+    <h3>Max Attack:{% for dice in dice_with_attack %}
+      {{dice}}
+      {% endfor %}
+    </h3>
+    <h3>Defense: {{defense}}</h3>
+    <h3>Max Defense:{% for dice in dice_with_defense %}
+      {{dice}}
+      {% endfor %}</h3>
+    <h3>Speed: {{speed}}</h3>
+  </div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-6">
+        <div id="map">
+          <table id="map-table"></table>
+          <div id="explore-buttons">
+            <h2>Explore</h2>
+            <button onclick="movedungeon(0)">Up</button>
+            <button onclick="movedungeon(3)">Left</button>
+            <button onclick="movedungeon(1)">Right</button>
+            <button onclick="movedungeon(2)">Down</button>
+            <button onclick="movedungeon(4)">Exit</button>
           </div>
         </div>
       </div>
-    
-    <div id="action-buttons">
-        <h2 >Action</h2>
-        <button id="attack" data-bs-toggle="modal" data-bs-target="#attackconfirm">Attack</button>
-        <button id="defend" data-bs-toggle="modal" data-bs-target="#defenseconfirm">Defend</button>
-        <button id="retreat" onclick="retreat()">Retreat</button>
+      <div class="col-sm-6">
+        <div id="textbox">
+          <p id="log"></p>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <div id="action-buttons">
+    <h2>Action</h2>
+    <button id="attack" data-bs-toggle="modal" data-bs-target="#attackconfirm">Attack</button>
+    <button id="defend" data-bs-toggle="modal" data-bs-target="#defenseconfirm">Defend</button>
+    <button id="retreat" onclick="retreat()">Retreat</button>
+  </div>
 </div>
 <div class="modal fade" id="attackconfirm" tabindex="-1" aria-labelledby="attackconfirm" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Attack</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Attack</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h6 class="m">how many dice would you like to spend on this attack?</h6>
+        <div class="form-group">
+          <label for="d4" class="form-label">D4</label>
+          <input type="text" class="form-control" id="d4" name="d4">
         </div>
-        <div class="modal-body">
-          <h6 class="m">how many dice would you like to spend on this attack?</h6>
-          <label for="dice" class="form-label">Dice Type</label>
-          <select class="form-select" id="dice">
-            <option value="d4">D4</option>
-            <option value="d6">D6</option>
-            <option value="d8">D8</option>
-            <option value="d10">D10</option>
-            <option value="d12">D12</option>
-            <option value="d20">D20</option>
-          </select>
-          
-          
+        <div class="form-group">
+          <label for="d6" class="form-label">D6</label>
+          <input type="text" class="form-control" id="d6" name="d6">
+        </div>
+        <div class="form-group">
+          <label for="d8" class="form-label">D8</label>
+          <input type="text" class="form-control" id="d8" name="d8">
+        </div>
+        <div class="form-group">
+          <label for="d10" class="form-label">D10</label>
+          <input type="text" class="form-control" id="d10" name="d10">
+        </div>
+        <div class="form-group">
+          <label for="d12" class="form-label">D12</label>
+          <input type="text" class="form-control" id="d12" name="d12">
+        </div>
+        <div class="form-group">
+          <label for="d20" class="form-label">D20</label>
+          <input type="text" class="form-control" id="d20" name="d20">
+        </div>
 
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-danger" onclick="attack()">Attack</button>
-        </div>
+
+
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="attack()">Attack</button>
       </div>
     </div>
   </div>
-  <div class="modal fade" id="defenseconfirm" tabindex="-1" aria-labelledby="defenseconfirm" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Enhance Defense</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <h6 class="m">How many dice would you like to spend to enhance your defense?</h6>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-danger" onclick="defend()">Enhance Defense</button>
-        </div>
+</div>
+<div class="modal fade" id="defenseconfirm" tabindex="-1" aria-labelledby="defenseconfirm" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Enhance Defense</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h6 class="m">How many dice would you like to spend to enhance your defense?</h6>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="defend()">Enhance Defense</button>
       </div>
     </div>
   </div>
+</div>
 
 <script>
-    var mapData = {{map_data|tojson}};
+  var mapData = {{ map_data| tojson}};
 </script>
 
 <script>
-    var exploreBtns = document.getElementById('explore-buttons');
-    var actionBtns = document.getElementById('action-buttons');
-    var state = "{{state}}";
+  var exploreBtns = document.getElementById('explore-buttons');
+  var actionBtns = document.getElementById('action-buttons');
+  var state = "{{state}}";
     /*if ( state === 'explore'){
-        exploreBtns.style.display = 'block';
-        actionBtns.style.display = 'none';
-    } else if ( state === 'battle'){
-        exploreBtns.style.display = 'none';
-        actionBtns.style.display = 'block';
-    }*/
+      exploreBtns.style.display = 'block';
+      actionBtns.style.display = 'none';
+  } else if ( state === 'battle'){
+      exploreBtns.style.display = 'none';
+      actionBtns.style.display = 'block';
+  }*/
 </script>
 <script src="{{ url_for('static', filename='/js/dungeon.js') }}"></script>
 {% endblock %}
