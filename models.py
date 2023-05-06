@@ -290,7 +290,7 @@ class Player(UserMixin, Base):
                 unequipped.append(item.item)
         return unequipped
 
-    def get_hands(self) -> Tuple["Item" | None, "Item" | None]:
+    def get_hands(self) -> Tuple["Item | None", "Item | None"]:
         """
         Returns items in hands. First hand always weapon (or none if nothing equipped). Second hand either second weapon, shield, or None if first weapon is two-handed.
         """
@@ -318,7 +318,7 @@ class Player(UserMixin, Base):
 
         return hands
     
-    def get_armor(self) -> "Item" | None:
+    def get_armor(self) -> "Item | None":
         """
         Returns armor equipped, or None if none equipped
         """
