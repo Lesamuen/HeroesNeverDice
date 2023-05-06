@@ -80,12 +80,12 @@ function attack(){
 
 function defend(){
     var totalDice=[]
-    totalDice.push(document.getElementById('d4').value);
-    totalDice.push(document.getElementById('d6').value);
-    totalDice.push(document.getElementById('d8').value);
-    totalDice.push(document.getElementById('d10').value);
-    totalDice.push(document.getElementById('d12').value);
-    totalDice.push(document.getElementById('d20').value);
+    totalDice.push(document.getElementById('dd4').value);
+    totalDice.push(document.getElementById('dd6').value);
+    totalDice.push(document.getElementById('dd8').value);
+    totalDice.push(document.getElementById('dd10').value);
+    totalDice.push(document.getElementById('dd12').value);
+    totalDice.push(document.getElementById('dd20').value);
 
     var http = new XMLHttpRequest();
     http.open("PUT", "/dungeon/defend");

@@ -125,7 +125,7 @@ def dungeon_attack():
     
     result = current_user.dungeon.battle.attack(app.session, spent)
     if not current_user.dungeon:
-        return redirect(url_for('home')), 302
+        return url_for('home'), 302
     if current_user.dungeon.battle:
         result += '\nCurrent hp: ' + str(current_user.dungeon.battle.player_hp)
     return result
@@ -139,7 +139,7 @@ def dungeon_defense():
         spent[i] = int(spent[i])
     result = current_user.dungeon.battle.defense(app.session, spent) 
     if not current_user.dungeon:
-        return redirect(url_for('home')), 302
+        return url_for('home'), 302
     if current_user.dungeon.battle:
         result += '\nCurrent hp: ' + str(current_user.dungeon.battle.player_hp)
     return result
@@ -150,7 +150,7 @@ def dungeon_defense():
 def dungeon_retreat():
     result = current_user.dungeon.battle.retreat(app.session)
     if not current_user.dungeon:
-        return 302
+        return url_for('home'),302
     if current_user.dungeon.battle:
         result += '\nCurrent hp: ' + str(current_user.dungeon.battle.player_hp)
     return result

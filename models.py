@@ -1350,7 +1350,7 @@ class Battle(Base):
         for i in range(6):
             actualSpent.append(spend[i] if spend[i] <= playerDefense[i] else playerDefense[i])
         
-        result = randomgen.spendDice(self.dungeon.player.get_dice())
+        result = randomgen.spendDice(self.dungeon.player.get_dice(),actualSpent)
         self.dungeon.player.dice = ints_to_dice(result[2])
         log += '\n' + result[1]
         self.player_temp_defense = result[0]
