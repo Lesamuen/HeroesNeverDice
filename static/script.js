@@ -1,8 +1,25 @@
 function sellItem() {
     // Sell Item in market place 
     // can only sell items that are in the list of items in inventory
+    var itemName = document.getElementById("itemName").value;
+    var itemPrice = document.getElementById("itemPrice").value;
 
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("POST", "http://127.0.0.1:5000/sell_item", true);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.onload = function () {
+        var response = JSON.parse(this.responseText);
+        if (response["status"] == "success") {
+            alert("Item has been sold");
+        } else {
+            alert("Item has not been sold");
+        }
+    }
+    const item = {"item.name": itemName, "item.price": itemPrice};
+    xhttp.send(JSON.stringify(item));
+    
 }
+
 
 function buyItem() {
     // Buy Item in market place 
@@ -20,14 +37,13 @@ function equipItem() {
 
     var xhttp = new XMLHttpRequest();
     xhttp.open("POST", "http://127.0.0.1:5000/equip_item", true);
-    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhttp.setRequestHeader("Content-type", "application/json");
     xhttp.onload = function () {
-        // handle response here 
-
+        
+    
     }
-    xhttp.send("item.name = " + item.name);
-
-
+    const item = {"item.id": item.id};
+    xhttp.send(JSON.stringify(item));
 }
 
 function unequipItem() {
@@ -38,10 +54,8 @@ function unequipItem() {
 
     var xhttp = new XMLHttpRequest();
     xhttp.open("POST", "http://127.0.0.1:5000/unequip_item", true);
-    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhttp.setRequestHeader("Content-type", "application/json");
     xhttp.onload = function () {
-        
-        // TODO: Implement the code to update the equipped items table
 
     };
     xhttp.send("item.name=" + item.name);
