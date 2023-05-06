@@ -62,11 +62,7 @@ class Player(UserMixin, Base):
         Returns currency as list of integers from d4 to d20
         """
         
-        currency = []
-        for i in range(6):
-            currency.append(int.from_bytes(self.dice[(i * 4) : (i * 4 + 4)]))
-
-        return tuple(currency)
+        return dice_to_int(self.dice)
 
     def split_dice(self, session: Session, typeFrom: int, typeTo: int, amount: int) -> int:
         """
@@ -990,7 +986,7 @@ class Battle(Base):
 
     def tick_until_player(self, session: Session) -> str:
         """
-        Simulates enemies until next player turn.
+        Simulates enemies until next player turn (player_init is 0)
 
         If death occurs, then death() called.
 
@@ -1039,6 +1035,84 @@ class Battle(Base):
             log += "\nPlayer's turn."
         
         session.commit()
+
+        return log
+
+    def attack(self, session: Session, spend: Tuple[int, int, int, int, int, int]) -> str:
+        """
+        Player attack action. Instead of erroring, if amount spent is more than is possible from weapons, then it is simply limited by weapon amount.
+        player_init reset to max.
+
+        If enemy is dead, then battle ends and they drop their dice. If boss, then item dropped too and exit is unlocked.
+
+        Arguments:
+         - session: request context
+         - spend: how much the player is trying to spend
+
+        Returns:
+         - combat log
+        """
+
+        log = "You strike at the " + self.enemy_name + "!"
+
+        actualSpent = []
+        playerAttack = self.dungeon.player.get_attack()
+        for i in range(6):
+            actualSpent.append(spend[i] if spend[i] <= playerAttack[i + 1] else playerAttack[i + 1])
+        
+        result = randomgen.spendDice(self.dungeon.player.get_dice())
+        self.dungeon.player.dice = ints_to_dice(result[2])
+        log += '\n' + result[1]
+
+        # deal damage, mitigated by defense
+        if result[0] <= self.enemy_temp_defense:
+            log += '\nThe ' + self.enemy_name + ' fends off your blow!'
+            self.enemy_temp_defense -= result[0]
+        elif result[0] <= self.enemy_temp_defense + self.enemy_defense:
+            log += '\nYour attack fails to penetrate the ' + self.enemy_name + "'s blow!"
+            self.enemy_temp_defense = 0
+        else:
+            result[0] -= self.enemy_temp_defense + self.enemy_defense
+            self.enemy_temp_defense = 0
+            self.enemy_hp -= result[0]
+            log += '\nYou deal ' + str(result[0]) + ' damage.'
+
+        if self.enemy_hp <= 0:
+            # enemy defeated
+            if self.boss:
+                self.dungeon.boss_defeated = True
+                log += '\nYou have defeated the boss, a ' + self.enemy_name + '!'
+
+                # currency
+                currencyDrop = dice_to_int(self.enemy_value)
+                currentCurrency = self.dungeon.player.get_dice()
+                for i in range(6):
+                    currentCurrency[i] += currencyDrop[i]
+                self.dungeon.player.dice = ints_to_dice(currentCurrency)
+                log += '\nIt dropped ' + str(currencyDrop[0]) + 'd4, ' + str(currencyDrop[1]) + 'd6, ' + str(currencyDrop[2]) + 'd8, ' + str(currencyDrop[3]) + 'd10, ' + str(currencyDrop[4]) + 'd12, and ' + str(currencyDrop[5]) + 'd20.'
+                
+                # item from 2 floors up
+                itemDrop = Item.gen(session, self.dungeon.floor + 2, self.dungeon.player)
+                log += '\nIt dropped a ' + itemDrop.item.name + '!'
+
+                log += "\nThe floor's exit has been unlocked..."
+            else:
+                log += '\nYou have defeated a ' + self.enemy_name + '!'
+
+                # currency
+                currencyDrop = dice_to_int(self.enemy_value)
+                currentCurrency = self.dungeon.player.get_dice()
+                for i in range(6):
+                    currentCurrency[i] += currencyDrop[i]
+                self.dungeon.player.dice = ints_to_dice(currentCurrency)
+                log += '\nIt dropped ' + str(currencyDrop[0]) + 'd4, ' + str(currencyDrop[1]) + 'd6, ' + str(currencyDrop[2]) + 'd8, ' + str(currencyDrop[3]) + 'd10, ' + str(currencyDrop[4]) + 'd12, and ' + str(currencyDrop[5]) + 'd20.'
+
+            session.execute(delete(Battle).where(Battle.dungeon_id == self.dungeon_id))
+            session.commit()
+        else:
+            # Simulate enemy turns until next player turn
+            self.player_init = 1000000000
+            log += '\n' + self.tick_until_player(session)
 
         return log
 
