@@ -69,10 +69,16 @@
     color: #b22222;
 }
 
-#vault-container h1,
+#vault-container h1 {
+    color: #ffd700;
+    text-align: center;
+}
+
 #vault-container h2 {
     color: #ffd700
 }
+
+
 
 #vault-container table th {
     color: #b22222;
