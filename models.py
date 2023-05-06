@@ -265,17 +265,7 @@ class Player(UserMixin, Base):
             return tuple(defense)
 
     # Inventory queries
-    def get_vault(self) -> List["Item"]:
-        """
-        Returns all items in vault, sorted by index.
-        """
-
-        vault = []
-        for item in self.vault:
-            vault.append(item.item)
-        return vault
-
-    def get_inv(self) -> List["Item"]:
+    def get_uneuipped(self) -> List["ItemInv"]:
         """
         Returns all unequipped items in inventory, sorted by index.
         """
@@ -283,10 +273,10 @@ class Player(UserMixin, Base):
         unequipped = []
         for item in self.inventory:
             if not item.equipped:
-                unequipped.append(item.item)
+                unequipped.append(item)
         return unequipped
 
-    def get_hands(self) -> Tuple["Item | None", "Item | None"]:
+    def get_hands(self) -> Tuple["ItemInv | None", "ItemInv | None"]:
         """
         Returns items in hands. First hand always weapon (or none if nothing equipped). Second hand either second weapon, shield, or None if first weapon is two-handed.
         """
@@ -296,9 +286,9 @@ class Player(UserMixin, Base):
         for item in self.inventory:
             if item.equipped:
                 if item.item.itemType == 0:
-                    weapons.append(item.item)
+                    weapons.append(item)
                 elif item.item.itemType == 1:
-                    shield = item.item
+                    shield = item
 
         hands = []
         if len(weapons) > 0:
@@ -314,14 +304,14 @@ class Player(UserMixin, Base):
 
         return hands
     
-    def get_armor(self) -> "Item | None":
+    def get_armor(self) -> "ItemInv | None":
         """
         Returns armor equipped, or None if none equipped
         """
 
         for item in self.inventory:
             if item.equipped and item.item.itemType == 2:
-                return item.item
+                return item
             
         return None
 
@@ -1123,8 +1113,6 @@ class Battle(Base):
         Player defense action. Instead of erroring, if amount spent is more than is possible from shield, then it is simply limited by shield amount.
         player_init reset to max.
 
-        If enemy is dead, then battle ends and they drop their dice. If boss, then item dropped too and exit is unlocked.
-
         Arguments:
          - session: request context
          - spend: how much the player is trying to spend
@@ -1148,6 +1136,45 @@ class Battle(Base):
         # Simulate enemy turns until next player turn
         self.player_init = 1000000000
         log += '\n' + self.tick_until_player(session)
+
+        return log
+
+    def retreat(self, session: Session) -> str:
+        """
+        Player retreat action.
+        If successful, battle ends, but player moved to previous room and room is blocked off.
+        If failed, player_init reset to max
+
+        Arguments:
+         - session: request context
+
+        Returns:
+         - combat log
+        """
+
+        log = "You attempt to run away!"
+
+        result = randomgen.runAway(self.dungeon.player.get_speed(), self.enemy_speed)
+        log += '\n' + result[1]
+        
+        if result[0]:
+            log += '\nSuccess! You retreat back the way you came...'
+
+            # set blocked on this room
+            row = self.dungeon.position & 15 #????xxxx
+            col = self.dungeon.position >> 4 #xxxx????
+            editableFloor = bytearray(self.dungeon.floor_data)
+            editableFloor[row * 10 + col] = editableFloor[row * 10 + col] | 128 #10000000 set blocked bit
+            self.dungeon.floor_data = editableFloor
+
+            # return to prev pos
+            self.dungeon.position = self.prev_pos
+            
+            session.execute(delete(Battle).where(Battle.dungeon_id == self.dungeon_id))
+            session.commit()
+        else:
+            self.player_init = 1000000000
+            log += "\nFailure!\n" + self.tick_until_player()
 
         return log
 
