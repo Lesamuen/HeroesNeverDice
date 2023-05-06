@@ -121,7 +121,6 @@ def dungeon_move():
 # Home page
 @app.route('/home')
 def home():
-    
     return render_template('home.html')
 
 # Market Page
@@ -132,7 +131,11 @@ def market():
 # Vault Page
 @app.route('/vault')
 def vault():
-    return render_template('vault.html')
+    tosend = []
+    inv = current_user.get_unequipped()
+    for i in inv:
+        tosend.append((i.item.name,i.item.desc()))
+    return render_template('vault.html', inv = tosend)
 
 # How to Play
 @app.route('/howtoplay')
