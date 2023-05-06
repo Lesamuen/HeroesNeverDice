@@ -37,6 +37,9 @@ class Player(UserMixin, Base):
      - get_defense: defense stat
      - get_attack: attack stat and attack dice max
      - get_active_defense: defense dice max
+     - get_vault_item: get specific item from vault
+     - get_inv_item: get specific item from inventory
+     - get_listing: get specific listing on market this player owns
      - get_unequipped: get unequipped items in inventory
      - get_hands: get items equipped in hand slots
      - get_armor: get item equipped in armor slot
@@ -313,6 +316,51 @@ class Player(UserMixin, Base):
             return tuple(defense)
 
     # Inventory queries
+    def get_vault_item(self, session: Session, id: int) -> 'ItemVault | None':
+        """
+        Retrieves a vault item by its id, if owned by player
+
+        Arguments:
+         - session: request context
+         - id: id of item to retrieve
+
+        Returns:
+         - queried item
+         - None if it doesn't exist or isn't owned by player
+        """
+
+        return session.execute(select(ItemVault).where(ItemVault.owner_id == self.id, ItemVault.item_id == id)).scalar()
+    
+    def get_inv_item(self, session: Session, id: int) -> 'ItemInv | None':
+        """
+        Retrieves an inventory item by its id, if owned by player
+
+        Arguments:
+         - session: request context
+         - id: id of item to retrieve
+
+        Returns:
+         - queried item
+         - None if it doesn't exist or isn't owned by player
+        """
+
+        return session.execute(select(ItemInv).where(ItemInv.owner_id == self.id, ItemInv.item_id == id)).scalar()
+    
+    def get_listing(self, session: Session, id: int) -> 'ItemMarket | None':
+        """
+        Retrieves a listing by its id, if owned by player
+
+        Arguments:
+         - session: request context
+         - id: id of item to retrieve
+
+        Returns:
+         - queried item
+         - None if it doesn't exist or isn't owned by player
+        """
+
+        return session.execute(select(ItemMarket).where(ItemMarket.owner_id == self.id, ItemMarket.item_id == id)).scalar()
+
     def get_unequipped(self) -> List["ItemInv"]:
         """
         Returns all unequipped items in inventory, sorted by index.
