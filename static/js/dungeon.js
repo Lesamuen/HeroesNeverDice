@@ -39,7 +39,7 @@ function getdungeon()
             http.setRequestHeader("Content-Type", "application/json");
             http.onload = function() {
                 if (this.status == 200){
-                    displayMap(jsonify(this.responseText));
+                    displayMap(JSON.parse(this.responseText));
                 }
             };
             http.send();
