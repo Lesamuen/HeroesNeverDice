@@ -744,7 +744,7 @@ class ItemMarket(Base):
     
     __tablename__ = "market"
 
-    item_id: Mapped[int] = mapped_column(ForeignKey("item.id"))
+    item_id: Mapped[int] = mapped_column(ForeignKey("item.id"), primary_key = True)
     item: Mapped["Item"] = relationship()
 
     owner_id: Mapped[int] = mapped_column(ForeignKey("player.id"))
