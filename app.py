@@ -121,16 +121,22 @@ def dungeon_move():
 # Home page
 @app.route('/home')
 def home():
+    if current_user.dungeon:
+        return redirect(url_for('display_dungeon'))
     return render_template('home.html')
 
 # Market Page
 @app.route('/market')
 def market():
+    if current_user.dungeon:
+        return redirect(url_for('display_dungeon'))
     return render_template('market.html')
 
 # Vault Page
 @app.route('/vault')
 def vault():
+    if current_user.dungeon:
+        return redirect(url_for('display_dungeon'))
     #tosend = []
     items = [ #testing tuple list
     ('Sword of Fire', 'A blazing sword that burns all in its path.'),
@@ -149,6 +155,8 @@ def vault():
 
 @app.route('/vault')
 def inventory():
+    if current_user.dungeon:
+        return redirect(url_for('display_dungeon'))
     toinv = []
     inv = current_user.get_inventory()
     for i in inv:
@@ -157,6 +165,8 @@ def inventory():
 
 @app.route('/vault')
 def equipped():
+    if current_user.dungeon:
+        return redirect(url_for('display_dungeon'))
     toequip = []
     hands = current_user.get_hands()
     armor = current_user.get_armor()
@@ -171,11 +181,15 @@ def equipped():
 # How to Play
 @app.route('/howtoplay')
 def howtoplay():
+    if current_user.dungeon:
+        return redirect(url_for('display_dungeon'))
     return render_template('howtoplay.html')
 
 # Account Page
 @app.route('/account', methods=['GET', 'POST'])
 def account():
+    if current_user.dungeon:
+        return redirect(url_for('display_dungeon'))
     if request.method == 'POST':
         currentPassword = request.form['current-password']
         newPassword = request.form['new-password']
