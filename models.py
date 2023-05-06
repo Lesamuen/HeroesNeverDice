@@ -1217,7 +1217,7 @@ class Battle(Base):
                 self.enemy_init += 1000000000
 
         if self.player_hp <= 0:
-            self.death()
+            self.death(session)
             log += "\nYou have died! Your body and soul is whisked away, leaving your items behind..."
         elif self.enemy_init == 2000000000: #using impossible number to mark escape
             # just delete battle, no reward
