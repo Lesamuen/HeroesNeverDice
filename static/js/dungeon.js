@@ -70,6 +70,14 @@ function movedungeon(direction){
 }
 
 function attack(){
+    var totalDice = [];
+    totalDice.push(document.getElementById("d4").value);
+    totalDice.push(document.getElementById("d6").value);
+    totalDice.push(document.getElementById("d8").value);
+    totalDice.push(document.getElementById("d10").value);
+    totalDice.push(document.getElementById("d12").value);
+    totalDice.push(document.getElementById("d20").value);
+
     var http = new XMLHttpRequest();
         http.open("PUT", "/dungeon/attack");
         http.setRequestHeader("Content-Type", "application/json");
@@ -78,10 +86,12 @@ function attack(){
                 $("#log").append(this.responseText + "\n");
             }
         };
-        http.send();
+        http.send(JSON.stringify({"spent_dice" : totalDice}));
 }
 
 function defend(){
+
+
     var http = new XMLHttpRequest();
     http.open("PUT", "/dungeon/defend");
     http.setRequestHeader("Content-Type", "application/json");
