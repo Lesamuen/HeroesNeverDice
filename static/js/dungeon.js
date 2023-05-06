@@ -44,26 +44,15 @@ function getdungeon()
             };
             http.send();
         }
-var MAX_LOG_SIZE = 20;
-var numLines = 0;
+
 function movedungeon(direction){
             var http = new XMLHttpRequest();
             http.open("PUT", "/dungeon/move");
             http.setRequestHeader("Content-Type", "application/json");
-            http.onload = function addtoLog(responseText) {
+            http.onload = function() {
                 if (this.status == 200){
                     $("#log").append(this.responseText + "\n");
-                    numLines++;
                     getdungeon();
-                    if (numLines > MAX_LOG_SIZE){
-                        var lines = $("#log").html().split('\n');
-                        lines.splice(0, numlines - MAX_LOG_SIZE);
-                        $("#log").html(lines.join("\n"))
-                        numLines=MAX_LOG_SIZE;
-                    }
-                }
-                else if(this.status == 302){
-                    window.location.href = this.responseText;
                 }
             };
             http.send(direction);
@@ -90,7 +79,13 @@ function attack(){
 }
 
 function defend(){
-
+    var totalDice=[]
+    totalDice.push(document.getElementById('d4').value);
+    totalDice.push(document.getElementById('d6').value);
+    totalDice.push(document.getElementById('d8').value);
+    totalDice.push(document.getElementById('d10').value);
+    totalDice.push(document.getElementById('d12').value);
+    totalDice.push(document.getElementById('d20').value);
 
     var http = new XMLHttpRequest();
     http.open("PUT", "/dungeon/defend");
@@ -100,7 +95,7 @@ function defend(){
             $("#log").append(this.responseText + "\n");
         }
     };
-    http.send();
+    http.send(JSON.stringify({"spent_dice" : totalDice}));
 }
 
 function retreat(){
@@ -110,6 +105,9 @@ function retreat(){
         http.onload = function() {
             if (this.status == 200){
                 $("#log").append(this.responseText + "\n");
+            }
+            else if(this.status == 302){
+                window.location.href = '/'
             }
         };
         http.send();

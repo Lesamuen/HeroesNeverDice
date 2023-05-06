@@ -1049,7 +1049,7 @@ class Dungeon(Base):
             session.commit()
 
             for item in session.scalars(select(ItemInv).where(ItemInv.owner_id == self.player_id, ItemInv.equipped == True)):
-                item.move_vault()
+                item.move_vault(session)
 
             return (0, "You have safely returned to town!")
         elif currRoomType == 5:
@@ -1259,7 +1259,7 @@ class Battle(Base):
         for i in range(6):
             actualSpent.append(spend[i] if spend[i] <= playerAttack[i + 1] else playerAttack[i + 1])
         
-        result = randomgen.spendDice(self.dungeon.player.get_dice())
+        result = randomgen.spendDice(self.dungeon.player.get_dice(),actualSpent)
         self.dungeon.player.dice = ints_to_dice(result[2])
         log += '\n' + result[1]
 

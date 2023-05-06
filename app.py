@@ -6,6 +6,7 @@ import models
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from sqlalchemy.orm import scoped_session
 from werkzeug.security import generate_password_hash, check_password_hash
+import json
 
 # Initialize Flask app
 app = Flask(__name__, template_folder = 'templates', static_folder = 'static')
@@ -119,10 +120,12 @@ def dungeon_move():
 @login_required
 def dungeon_attack():
     spent = request.get_json()['spent_dice']
+    for i in range(len(spent)):
+        spent[i] = int(spent[i])
     
-    if not current_user.dungeon:
-        return url_for('home'), 302
     result = current_user.dungeon.battle.attack(app.session, spent)
+    if not current_user.dungeon:
+        return redirect(url_for('home')), 302
     if current_user.dungeon.battle:
         result += '\nCurrent hp: ' + str(current_user.dungeon.battle.player_hp)
     return result
@@ -132,10 +135,11 @@ def dungeon_attack():
 @login_required
 def dungeon_defense():
     spent = request.get_json()['spent_dice']
-     
+    for i in range(len(spent)):
+        spent[i] = int(spent[i])
+    result = current_user.dungeon.battle.defense(app.session, spent) 
     if not current_user.dungeon:
-        return url_for('home'), 302
-    result = current_user.dungeon.battle.defense(app.session, spent)
+        return redirect(url_for('home')), 302
     if current_user.dungeon.battle:
         result += '\nCurrent hp: ' + str(current_user.dungeon.battle.player_hp)
     return result
@@ -144,15 +148,15 @@ def dungeon_defense():
 @app.route('/dungeon/retreat', methods = ['PUT', 'GET'])
 @login_required
 def dungeon_retreat():
-    if not current_user.dungeon:
-        return url_for('home'), 302
     result = current_user.dungeon.battle.retreat(app.session)
+    if not current_user.dungeon:
+        return 302
     if current_user.dungeon.battle:
         result += '\nCurrent hp: ' + str(current_user.dungeon.battle.player_hp)
     return result
 
 # Home page
-@app.route('/home', methods=['GET', 'PUT'])
+@app.route('/home', methods=['GET'])
 @login_required
 def home():
     if current_user.dungeon:
