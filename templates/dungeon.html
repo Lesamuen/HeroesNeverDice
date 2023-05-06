@@ -1,4 +1,46 @@
-{% extends "dungeonbase.html" %} {% block title %}Dungeon{% endblock %} {% block header %} {% endblock %}
+{% extends "dungeonbase.html" %}
+
+{% block title %}
+    Dungeon
+{% endblock %}
+
+{% block header %}
+{% endblock %}
 
 {% block content %}
+    <div>
+        <h2>Current Health: {{ current_health }}</h2>
+        <h2>Current Currency: {{ current_currency }}</h2>
+    </div>
+    <div>
+        <h2>Text from Flask Backend:</h2>
+        <p>{{ text_from_backend }}</p>
+    </div>
+    <div>
+        <h2>Movement</h2>
+        <button>Up</button>
+        <button>Down</button>
+        <button>Left</button>
+        <button>Right</button>
+        <button>Exit</button>
+    </div>
+    <div>
+        <h2>Actions</h2>
+        <button id="attack">Attack</button>
+        <button id="defend">Defend</button>
+        <button id="retreat">Retreat</button>
+    </div>
+</div>
+
+<script>
+    document.getElementById("attack").addEventListener("click", function() {
+        var num_dice = prompt("How many dice would you like to use for your attack?");
+        // Code to send num_dice to Flask backend goes here
+    });
+    
+    document.getElementById("defend").addEventListener("click", function() {
+        var num_dice = prompt("How many dice would you like to use for your defense?");
+        // Code to send num_dice to Flask backend goes here
+    });
+</script>
 {% endblock %}
