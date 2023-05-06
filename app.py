@@ -100,11 +100,9 @@ def get_dungeon():
 @app.route('/dungeon', methods = ['POST'])
 @login_required
 def gen_dungeon():
-    if current_user.dungeon:
-        return "You're already in a dungeon!", 409
-    else:
-        ###TODO could use Jinja here
-        return models.Dungeon.new(app.session, current_user).parse_map() 
+    if not current_user.dungeon:
+        models.Dungeon.new(app.session, current_user)
+    return "Success", 200
 
 @app.route('/dungeon/move', methods = ['PUT'])
 @login_required
