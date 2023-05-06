@@ -49,7 +49,7 @@ class Player(UserMixin, Base):
     
     # Currency
     dice: Mapped[bytes] = mapped_column(default = bytes([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
-    split_conv = ((), (1,), (2, 1), (2, 1, 1), (3, 2, 1, 1), (5, 3, 2, 2, 1))
+    split_conv = ((1,), (1, 1), (2, 1, 1), (2, 1, 1, 1), (3, 2, 1, 1, 1), (5, 3, 2, 2, 1, 1))
 
     # Items
     vault: Mapped[List["ItemVault"]] = relationship(back_populates = "owner")
@@ -664,6 +664,7 @@ class ItemMarket(Base):
     Represents an Item listed by a Player on the Market; stays until taken off or another Player buys it.
 
     Arguments:
+     - id: id of the listing
      - item_id: id of the Item
      - item: reference to the Item
      - owner_id: id of the Item's owner
@@ -671,12 +672,14 @@ class ItemMarket(Base):
      - price: amount of d4s (matching fusing exchange rates) the owner has put the Item up for sale
 
     Methods:
+     - get_listing: get a listing directly by its item id
      - unlist: take item off of market back into vault
+     - buy: purchase an item
     """
     
     __tablename__ = "market"
 
-    item_id: Mapped[int] = mapped_column(ForeignKey("item.id"), primary_key = True)
+    item_id: Mapped[int] = mapped_column(ForeignKey("item.id"))
     item: Mapped["Item"] = relationship()
 
     owner_id: Mapped[int] = mapped_column(ForeignKey("player.id"))
@@ -684,6 +687,22 @@ class ItemMarket(Base):
 
     price: Mapped[int]
     
+
+    @staticmethod
+    def get_listing(session: Session, id: int) -> 'ItemMarket | None':
+        """
+        Gets an ItemMarket by its id.
+
+        Arguments:
+         - session: request context
+         - id: id of the item
+
+        Returns:
+         - the queried listing
+         - None if doesn't exist
+        """
+
+        return session.execute(select(ItemMarket).where(ItemMarket.item_id == id)).scalar()
 
     def unlist(self, session: Session) -> None:
         """
@@ -696,6 +715,54 @@ class ItemMarket(Base):
         session.execute(insert(ItemVault).values(item_id = self.item_id, owner_id = self.owner_id))
         session.execute(delete(ItemMarket).where(ItemMarket.item_id == self.item_id))
         session.commit()
+
+    def buy(self, session: Session, customer: Player, paying: Tuple[int, int, int, int, int, int]) -> bool:
+        """
+        Given player attempts to buy an item using given currency.
+
+        Arguments:
+         - session: request context
+         - customer: the player buying the item
+         - paying: currency list of dice the customer wants to use to pay
+
+        Returns:
+         - true if successful transaction
+         - false if customer and owner are the same
+         - false if not enough currency
+         - false if currency not enough to pay price
+        """
+
+        # owner check
+        if customer is self.owner:
+            return False
+
+        # test if player even has enough currency
+        customerCurrency = customer.get_dice()
+        for i in range(6):
+            if paying[i] > customerCurrency[i]:
+                return False
+        
+        # test if currency is enough
+        payingConv = 0
+        for i in range(6):
+            payingConv += paying[i] * Player.split_conv[i][0]
+        if payingConv < self.price:
+            return False
+        
+        # if overpaying, do nothing special because customer didn't do math lol
+        # transfer dice from customer to owner, then transfer item from owner to customer's vault
+        ownerCurrency = self.owner.get_dice()
+        for i in range(6):
+            customerCurrency[i] -= paying[i]
+            ownerCurrency[i] += paying[i]
+        customer.dice = ints_to_dice(customerCurrency)
+        self.owner.dice = ints_to_dice(ownerCurrency)
+
+        session.execute(insert(ItemVault).values(item_id = self.item_id, owner_id = customer.id))
+        session.execute(delete(ItemMarket).where(ItemMarket.item_id == self.item_id))
+        session.commit()
+
+        return True
 
 
 class Dungeon(Base):
