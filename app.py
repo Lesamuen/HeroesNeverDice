@@ -75,7 +75,7 @@ def register_page():
 @app.route('/register', methods=['POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('/home'))
+        return redirect(url_for('home'))
     
     username = request.form.get('username')
     password = request.form.get('password')
@@ -84,7 +84,7 @@ def register():
 
     if player:
         login_user(player)
-        return redirect(url_for('/home'))
+        return redirect(url_for('home'))
     return "Username is taken!", 409
 
 # Dungeon routes
