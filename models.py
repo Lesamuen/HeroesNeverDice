@@ -34,6 +34,9 @@ class Player(UserMixin, Base):
      - get_defense: defense stat
      - get_attack: attack stat and attack dice max
      - get_active_defense: defense dice max
+     - get_unequipped: get unequipped items in inventory
+     - get_hands: get items equipped in hand slots
+     - get_armor: get item equipped in armor slot
     """
 
     __tablename__ = "player"
